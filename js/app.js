@@ -1239,47 +1239,102 @@ function guardarCasoActual() {
     guardarCasos(casos);
 }
 
-function actualizarListaHistorico() {
+async function actualizarListaHistorico() {
     const container = document.getElementById('history-list');
-    const casos = carregarCasos();
     
-    if (casos.length === 0) {
-        container.innerHTML = '<div class="history-empty"><p>Nenhum caso guardado</p></div>';
+    // Verificar autenticação
+    if (!API.isAuthenticated()) {
+        container.innerHTML = '<div class="history-empty"><p>Faça login para ver os casos guardados</p></div>';
         return;
     }
     
-    container.innerHTML = casos.sort((a, b) => new Date(b.dataModificacao) - new Date(a.dataModificacao)).map(caso => `
-        <div class="history-item" data-id="${caso.id}">
-            <div class="history-item-info">
-                <h4>${caso.id} - ${caso.nome || 'Sem nome'}</h4>
-                <p>Data: ${caso.data} | Avaliador: ${caso.avaliador || '-'}</p>
+    container.innerHTML = '<div class="history-empty"><p>A carregar...</p></div>';
+    
+    try {
+        const casos = await API.listarCasos();
+        
+        if (casos.length === 0) {
+            container.innerHTML = '<div class="history-empty"><p>Nenhum caso guardado</p></div>';
+            return;
+        }
+        
+        container.innerHTML = casos.map(caso => `
+            <div class="history-item" data-id="${caso.id}">
+                <div class="history-item-info">
+                    <h4>${caso.codigo || 'Sem código'} - ${caso.nome || 'Sem nome'}</h4>
+                    <p>Data: ${caso.data_avaliacao || '-'} | Avaliador: ${caso.avaliador || '-'}</p>
+                </div>
+                <div class="history-item-actions">
+                    <button class="btn-mini" onclick="carregarCasoGuardado(${caso.id})" title="Carregar">↑</button>
+                    <button class="btn-mini" onclick="eliminarCasoGuardado(${caso.id})" title="Eliminar">×</button>
+                </div>
             </div>
-            <div class="history-item-actions">
-                <button class="btn-mini" onclick="carregarCasoGuardado('${caso.id}')" title="Carregar">↑</button>
-                <button class="btn-mini" onclick="eliminarCasoGuardado('${caso.id}')" title="Eliminar">×</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function carregarCasoGuardado(id) {
-    const casos = carregarCasos();
-    const caso = casos.find(c => c.id === id);
-    if (!caso) {
-        mostrarToast('Caso não encontrado', 'error');
-        return;
+        `).join('');
+    } catch (error) {
+        console.error('Erro ao carregar histórico:', error);
+        container.innerHTML = '<div class="history-empty"><p>Erro ao carregar casos</p></div>';
     }
-    carregarCaso(caso);
-    fecharModal('modal-history');
-    mostrarToast('Caso carregado!', 'success');
 }
 
-function eliminarCasoGuardado(id) {
-    if (!confirm(`Eliminar o caso "${id}"?`)) return;
-    const casos = carregarCasos().filter(c => c.id !== id);
-    guardarCasos(casos);
-    actualizarListaHistorico();
-    mostrarToast('Caso eliminado', 'warning');
+async function carregarCasoGuardado(id) {
+    try {
+        const caso = await API.obterCaso(id);
+        if (!caso) {
+            mostrarToast('Caso não encontrado', 'error');
+            return;
+        }
+        
+        // Converter formato Supabase para formato da app
+        const casoConvertido = {
+            id: caso.codigo,
+            codigo: caso.codigo,
+            nome: caso.nome,
+            idade: caso.idade,
+            data: caso.data_avaliacao,
+            escolaridade: caso.ano_escolar,
+            avaliador: caso.avaliador,
+            competencias: new Array(40).fill(null),
+            provasAplicadas: (caso.provas || []).map(p => ({
+                prova: p.prova_nome,
+                sigla: p.prova_sigla,
+                segs: p.segmento ? p.segmento.split(',').map(Number) : [],
+                valor: p.valor,
+                esc: p.escala,
+                comp: p.competencia
+            }))
+        };
+        
+        // Reconstruir competências a partir das provas
+        casoConvertido.provasAplicadas.forEach(p => {
+            if (p.segs && p.comp !== null) {
+                p.segs.forEach(segIdx => {
+                    if (segIdx >= 0 && segIdx < 40) {
+                        casoConvertido.competencias[segIdx] = p.comp;
+                    }
+                });
+            }
+        });
+        
+        carregarCaso(casoConvertido);
+        fecharModal('modal-history');
+        mostrarToast('Caso carregado!', 'success');
+    } catch (error) {
+        console.error('Erro ao carregar caso:', error);
+        mostrarToast('Erro ao carregar caso', 'error');
+    }
+}
+
+async function eliminarCasoGuardado(id) {
+    if (!confirm('Eliminar este caso?')) return;
+    
+    try {
+        await API.eliminarCaso(id);
+        await actualizarListaHistorico();
+        mostrarToast('Caso eliminado', 'warning');
+    } catch (error) {
+        console.error('Erro ao eliminar:', error);
+        mostrarToast('Erro ao eliminar caso', 'error');
+    }
 }
 
 function filtrarHistorico(e) {
