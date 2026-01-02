@@ -124,18 +124,23 @@ Freitas, M. J., Lousada, M., & Alves, D. C. (Eds.). (2022). *Linguística clíni
 
 ## Autoria
 
-**Conceptualização e operacionalização:** Joana Miguel  
-**Modelo teórico:** Dina Caetano Alves (2019)
+**Conceptualização, desenvolvimento e operacionalização:** Joana Miguel (2025)
 
 **Afiliações:**
 - CAIDI — Centro de Apoio e Intervenção no Desenvolvimento Infantil
 - CLUNL — Centro de Linguística da Universidade NOVA de Lisboa
+  
+**Modelo teórico:** Dina Caetano Alves (2019)
+
+**Afiliações:**
+- CLUL — Centro de Linguística da Universidade de Lisboa
+- IPS — Instituto politécnico de Setúbal
 
 ---
 
 ## Direitos de Autor
 
-**© 2025 Joana Miguel · Todos os direitos reservados**
+**© 2025 NIDCAIDI — CAIDI · Todos os direitos reservados**
 
 Este software e a sua documentação são propriedade exclusiva da autora. Não é permitida a cópia, modificação, distribuição ou utilização sem autorização prévia e expressa.
 
