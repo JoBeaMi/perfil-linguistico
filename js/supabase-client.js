@@ -71,10 +71,10 @@ const API = {
         return { user: this.user };
     },
     
-    logout() {
-        supabaseClient.auth.signOut();
+    async logout() {
+        await supabaseClient.auth.signOut();
         this.user = null;
-        window.location.reload();
+        mostrarLogin();
     },
     
     // ========================================================================

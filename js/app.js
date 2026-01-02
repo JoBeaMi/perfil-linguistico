@@ -1860,8 +1860,8 @@ function inicializarAuth() {
     });
     
     // Logout
-    document.getElementById('btn-logout').addEventListener('click', () => {
-        API.logout();
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+        await API.logout();
         mostrarToast('Sessão terminada', 'info');
     });
     
