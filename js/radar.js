@@ -389,6 +389,12 @@ class RadarChart {
         const r2 = centro * this.config.rCircuito[1];
         const txtColor = this.isDarkMode ? '#CBD5E1' : '#555555';
         
+        // Nomes dos circuitos por módulo
+        const nomesCircuito = {
+            lexical: ['Compreensão', 'Expressão'],
+            sublexical: ['Perceção', 'Produção']
+        };
+        
         for (let i = 0; i < 20; i++) {
             const circIdx = i % 2;
             const modIdx = Math.floor(i / 4); // 4 secções por módulo (20/5)
@@ -407,8 +413,8 @@ class RadarChart {
             ctx.stroke();
             
             // Usar terminologia sublexical para Fonológico (modIdx=0)
-            const circuito = (modIdx === 0) ? CIRCUITOS_SUBLEXICAL[circIdx] : CIRCUITOS[circIdx];
-            this.desenharTextoArco(ctx, centro, (r1 + r2) / 2, a0, a1, circuito.nome, 9, txtColor);
+            const nomes = (modIdx === 0) ? nomesCircuito.sublexical : nomesCircuito.lexical;
+            this.desenharTextoArco(ctx, centro, (r1 + r2) / 2, a0, a1, nomes[circIdx], 9, txtColor);
         }
     }
     
