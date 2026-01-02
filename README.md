@@ -1,10 +1,19 @@
-# PERLIM  
-## Perfil Linguístico Multidimensional
+<div align="center">
 
-Ferramenta web para caracterização, leitura e interpretação de perfis linguísticos.
+# PERLIM
 
-Baseada no modelo conceptual da linguagem oral (Alves, 2019)  
-Conceptualização e operacionalização: Joana Miguel · CAIDI · CLUNL
+### Perfil Linguístico Multidimensional
+
+Ferramenta web para caracterização, leitura e interpretação de perfis linguísticos  
+Baseada no modelo conceptual da linguagem oral (Alves, 2019)
+
+[![Demo](https://img.shields.io/badge/Demo-Online-00a99d?style=for-the-badge)](https://jobeami.github.io/perfil-linguistico)
+[![License](https://img.shields.io/badge/Licença-MIT-blue?style=for-the-badge)](LICENSE)
+
+**Conceptualização e operacionalização:** Joana Miguel  
+CAIDI · CLUNL
+
+</div>
 
 ---
 
@@ -12,77 +21,76 @@ Conceptualização e operacionalização: Joana Miguel · CAIDI · CLUNL
 
 O **PERLIM** é uma ferramenta profissional que permite **organizar, visualizar e interpretar informação linguística de forma multidimensional**, preservando a complexidade do funcionamento linguístico.
 
-A ferramenta **apoia a formulação clínica e a tomada de decisão diagnóstica**, permitindo a identificação de padrões de funcionamento, assimetrias e níveis de severidade da dificuldade linguística.  
-Não substitui instrumentos de avaliação estandardizados nem critérios diagnósticos formais, devendo ser utilizada como **ferramenta de integração e interpretação do perfil linguístico**.
+A ferramenta **apoia a formulação clínica e a tomada de decisão diagnóstica**, permitindo a identificação de padrões de funcionamento, assimetrias e níveis de severidade da dificuldade linguística.
+
+> ⚠️ **Nota:** O PERLIM não substitui instrumentos de avaliação estandardizados nem critérios diagnósticos formais. Deve ser utilizado como **ferramenta de integração e interpretação do perfil linguístico**.
 
 ---
 
-## Modelo conceptual
+## Modelo Conceptual
 
 O PERLIM operacionaliza o modelo conceptual da linguagem oral descrito por Alves (2019), no qual a linguagem é entendida como um sistema modular e funcional, organizado por diferentes níveis linguísticos e circuitos de processamento.
 
-A estrutura do perfil assenta em quatro eixos fundamentais:
+A estrutura do perfil assenta em **quatro eixos fundamentais**:
 
-### Módulos linguísticos  
-Fonológico · Morfológico · Sintático · Semântico · Pragmático
-
-### Níveis de funcionamento  
-Implícito (automático) · Explícito (metalinguístico)
-
-### Circuitos de processamento  
-Compreensão (input) · Expressão (output)
-
-### Modalidades  
-Oral · Escrita
+| Eixo | Dimensões |
+|------|-----------|
+| **Módulos linguísticos** | Fonológico · Morfológico · Sintático · Semântico · Pragmático |
+| **Níveis de funcionamento** | Implícito (automático) · Explícito (metalinguístico) |
+| **Circuitos de processamento** | Perceção/Compreensão (input) · Produção/Expressão (output) |
+| **Modalidades** | Oral · Escrita |
 
 A combinação destes eixos resulta em **40 segmentos funcionais**, que permitem uma leitura fina e integrada do perfil linguístico.
 
 ---
 
-## Utilização clínica e interpretativa
+## Utilização Clínica
 
 O PERLIM permite:
 
-- Caracterizar o perfil linguístico global e por domínios específicos  
-- Identificar **assimetrias e dissociações funcionais** entre níveis linguísticos  
-- Apoiar a **hipótese diagnóstica**, em articulação com outros dados clínicos  
-- Contribuir para a **análise da severidade da dificuldade linguística**  
-- Apoiar decisões de intervenção e monitorização do progresso  
+- 📊 Caracterizar o **perfil linguístico global** e por domínios específicos
+- 🔍 Identificar **assimetrias e dissociações funcionais** entre níveis linguísticos
+- 🎯 Apoiar a **formulação de hipóteses diagnósticas**, em articulação com outros dados clínicos
+- 📈 Contribuir para a **análise da severidade** da dificuldade linguística
+- 📋 Apoiar decisões de **intervenção e monitorização** do progresso
+
+---
+
+## Zonas de Leitura do Perfil
+
+| Zona | Competência | Interpretação |
+|:----:|:-----------:|---------------|
+| 🔴 | 0–3 | Dificuldade acentuada |
+| 🟡 | 3–5 | Dificuldade moderada / provável |
+| ⚪ | 5–10 | Desempenho típico |
 
 ---
 
 ## Funcionalidades
 
-- Visualização do perfil linguístico através de um gráfico radar interactivo  
-- Conversão automática entre diferentes métricas (Percentil, QI, Nota Z, Nota T)  
-- Armazenamento seguro de dados na cloud (Supabase)  
-- Contas de utilizador para terapeutas e investigadores  
-- Interface responsiva (desktop, tablet e dispositivos móveis)  
-- Modo claro e modo escuro  
-- Exportação de resultados em PNG, JSON, CSV e relatório PDF
+- **Visualização radar** — Gráfico interactivo do perfil linguístico multidimensional
+- **Conversão automática** — Entre métricas normalizadas (Percentil, QI, Nota Z, Nota T)
+- **Armazenamento cloud** — Dados seguros com autenticação de utilizador (Supabase)
+- **Multi-dispositivo** — Interface responsiva para desktop, tablet e mobile
+- **Temas** — Modo claro e modo escuro
+- **Exportação** — PNG, JSON, CSV e relatório PDF
 
 ---
 
-## Zonas de leitura do perfil
+## Tecnologias
 
-| Zona | Competência | Interpretação funcional |
-| --- | --- | --- |
-| 🔴 Vermelha | 0-3 | Dificuldade acentuada |
-| 🟡 Amarela | 3-5 | Dificuldade moderada/ provável |
-| ⚪ Branca | 5-10 | Desempenho típico |
-
----
-
-## Demonstração
-
-A aplicação pode ser explorada em:  
-https://jobeami.github.io/perfil-linguistico
+| Componente | Tecnologia |
+|------------|------------|
+| Frontend | HTML5, CSS3, JavaScript (ES6+) |
+| Visualização | Canvas API |
+| Backend/Auth | Supabase |
+| Hosting | GitHub Pages |
 
 ---
 
-## Estrutura do projecto
+## Estrutura do Projecto
 
-```text
+```
 perfil-linguistico/
 ├── index.html
 ├── manifest.json
@@ -95,28 +103,48 @@ perfil-linguistico/
     ├── data.js
     ├── radar.js
     └── app.js
-
-## 📊 Zonas de Referência
-
-
-
-## 📚 Referências
-
-* Alves, D. (2019). Oral language. In The SAGE encyclopedia of human communication sciences and disorders (Vol. 4, pp. 1286–1289). SAGE Publications, Inc.
-https://doi.org/10.4135/9781483380810.n425
-
-* Freitas, M.J., Lousada, M., & Alves, D.C. (Eds.) (2022). *Linguística Clínica*. Language Science Press.
-
-## 👩‍💻 Autoria
-
-**Conceptualização e operacionalização:** Joana Miguel  
-**Base teórica:** Dina Caetaneo Alves (2019)
-
-## 📄 Licença
-
-Este projecto está licenciado sob a MIT License.
+```
 
 ---
+
+## Demonstração
+
+A aplicação está disponível em:
+
+🔗 **https://jobeami.github.io/perfil-linguistico**
+
+---
+
+## Referências
+
+Alves, D. C. (2019). Oral language. In J. S. Damico & M. J. Ball (Eds.), *The SAGE encyclopedia of human communication sciences and disorders* (Vol. 4, pp. 1286–1289). SAGE Publications. https://doi.org/10.4135/9781483380810.n425
+
+Freitas, M. J., Lousada, M., & Alves, D. C. (Eds.). (2022). *Linguística clínica: Modelos, avaliação e intervenção*. Language Science Press. https://doi.org/10.5281/zenodo.7233311
+
+---
+
+## Autoria
+
+**Conceptualização e operacionalização:** Joana Miguel  
+**Modelo teórico:** Dina Caetano Alves (2019)
+
+**Afiliações:**
+- CAIDI — Centro de Apoio e Intervenção no Desenvolvimento Infantil
+- CLUNL — Centro de Linguística da Universidade NOVA de Lisboa
+
+---
+
+## Licença
+
+Este projecto está licenciado sob a [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+*Desenvolvido com ♥ para a prática clínica e investigação em linguística*
+
+</div>
 
 **CAIDI** - Centro de Apoio e Intervenção no Desenvolvimento Infantil
 
