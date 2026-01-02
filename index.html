@@ -20,6 +20,48 @@
         <p>A carregar...</p>
     </div>
 
+    <!-- Ecrã de Login Obrigatório -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <img src="logo.png" alt="CAIDI" class="login-logo">
+                <h1>Perfil de Competência Linguística</h1>
+                <p>Quadrantes de Alves (2019) · Operacionalização: J. Miguel</p>
+            </div>
+            <div class="login-box">
+                <div class="login-tabs">
+                    <button class="login-tab active" data-tab="login">Entrar</button>
+                    <button class="login-tab" data-tab="register">Criar Conta</button>
+                </div>
+                <form id="login-form">
+                    <div class="form-group" id="login-nome-group" style="display:none">
+                        <label for="login-nome">Nome</label>
+                        <input type="text" id="login-nome" placeholder="O seu nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="email@exemplo.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="••••••••" required minlength="6">
+                    </div>
+                    <div class="form-error" id="login-error"></div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit">Entrar</button>
+                </form>
+                <p class="login-info">
+                    <small>Ferramenta para investigação. Os dados ficam guardados de forma segura.</small>
+                </p>
+            </div>
+            <div class="login-footer">
+                <p>CAIDI - Centro de Apoio e Intervenção no Desenvolvimento Infantil</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Content (escondido até login) -->
+    <div id="app-content" class="app-content" style="display:none">
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -641,6 +683,8 @@
             </div>
         </div>
     </div>
+
+    </div><!-- Fim do app-content -->
 
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
