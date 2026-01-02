@@ -75,10 +75,12 @@ function inicializarPaineis() {
                 for (let o = 0; o < 2; o++) {
                     const idx = mi * 8 + ni * 4 + c * 2 + o;
                     const isEscrita = o === 1;
+                    // Usar terminologia sublexical para Fonológico (mi=0)
+                    const circuito = (mi === 0) ? CIRCUITOS_SUBLEXICAL[c] : CIRCUITOS[c];
                     
                     html += `
                         <div class="comp-item ${isEscrita ? 'escrita' : ''}" data-idx="${idx}" style="--mod-color: ${mod.cor}">
-                            <span class="comp-label">${CIRCUITOS[c].abrev}-${MODALIDADES[o].abrev}</span>
+                            <span class="comp-label">${circuito.abrev}-${MODALIDADES[o].abrev}</span>
                             <input type="range" class="comp-slider" min="0" max="10" value="5" data-idx="${idx}">
                             <input type="number" class="comp-val zone-green" id="v-${idx}" min="0" max="10" placeholder="—" data-idx="${idx}" data-testid="comp-${idx}">
                         </div>
@@ -721,11 +723,13 @@ function gerarAnalise() {
             const cls = x.comp < 3 ? 'critical' : 'warning';
             const tag = x.comp < 3 ? 'tag-danger' : 'tag-warning';
             const pri = x.comp < 3 ? 'URGENTE' : 'PRIORITÁRIO';
+            // Usar terminologia sublexical para Fonológico
+            const circuito = (x.seg.modulo === 0) ? CIRCUITOS_SUBLEXICAL[x.seg.circuito] : CIRCUITOS[x.seg.circuito];
             
             interv += `
                 <div class="analysis-item ${cls}">
                     <span class="tag ${tag}">${pri}</span>
-                    <b>${MODULOS[x.seg.modulo].nome}</b> → ${NIVEIS[x.seg.nivel].nome} → ${CIRCUITOS[x.seg.circuito].nome} → ${MODALIDADES[x.seg.modalidade].nome}
+                    <b>${MODULOS[x.seg.modulo].nome}</b> → ${NIVEIS[x.seg.nivel].nome} → ${circuito.nome} → ${MODALIDADES[x.seg.modalidade].nome}
                     <span style="margin-left:auto;font-weight:700">${x.comp}/10</span>
                 </div>
             `;
@@ -733,7 +737,7 @@ function gerarAnalise() {
             analise.prioridades.push({
                 dominio: MODULOS[x.seg.modulo].nome,
                 nivel: NIVEIS[x.seg.nivel].nome,
-                circuito: CIRCUITOS[x.seg.circuito].nome,
+                circuito: circuito.nome,
                 modalidade: MODALIDADES[x.seg.modalidade].nome,
                 competencia: x.comp
             });
@@ -1603,14 +1607,16 @@ function abrirModalNovaProva() {
     
     // Preencher selector de segmentos
     const selector = document.getElementById('segmentos-selector');
-    selector.innerHTML = SEGMENTOS.map(seg => `
+    selector.innerHTML = SEGMENTOS.map(seg => {
+        const circuito = (seg.modulo === 0) ? CIRCUITOS_SUBLEXICAL[seg.circuito] : CIRCUITOS[seg.circuito];
+        return `
         <label class="seg-checkbox" data-seg="${seg.id}">
             <input type="checkbox" value="${seg.id}">
             <span style="font-size:9px;color:${MODULOS[seg.modulo].cor}">${MODULOS[seg.modulo].abrev}</span>
             <span>${NIVEIS[seg.nivel].nome.slice(0,3)}</span>
-            <span>${CIRCUITOS[seg.circuito].abrev}-${MODALIDADES[seg.modalidade].abrev}</span>
+            <span>${circuito.abrev}-${MODALIDADES[seg.modalidade].abrev}</span>
         </label>
-    `).join('');
+    `}).join('');
     
     selector.querySelectorAll('.seg-checkbox').forEach(label => {
         label.addEventListener('click', () => {

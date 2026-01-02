@@ -31,6 +31,12 @@ const CIRCUITOS = [
     { id: 1, nome: 'Expressão', abrev: 'Expr', descricao: 'Output linguístico' }
 ];
 
+// Circuitos para nível sublexical (Fonológico)
+const CIRCUITOS_SUBLEXICAL = [
+    { id: 0, nome: 'Perceção', abrev: 'Perc', descricao: 'Input sublexical' },
+    { id: 1, nome: 'Produção', abrev: 'Prod', descricao: 'Output sublexical' }
+];
+
 const MODALIDADES = [
     { id: 0, nome: 'Oral', abrev: 'Ora' },
     { id: 1, nome: 'Escrita', abrev: 'Esc' }
@@ -44,6 +50,9 @@ function gerarSegmentos() {
         for (let n = 0; n < 2; n++) {
             for (let c = 0; c < 2; c++) {
                 for (let o = 0; o < 2; o++) {
+                    // Usar terminologia sublexical para Fonológico (m=0)
+                    const circuito = (m === 0) ? CIRCUITOS_SUBLEXICAL[c] : CIRCUITOS[c];
+                    
                     segs.push({
                         id,
                         modulo: m,
@@ -51,8 +60,10 @@ function gerarSegmentos() {
                         nivel: n,
                         circuito: c,
                         modalidade: o,
-                        codigo: `${DOMINIOS[m].abrev}-${NIVEIS[n].nome.slice(0,3)}-${CIRCUITOS[c].abrev}-${MODALIDADES[o].abrev}`,
-                        descricao: `${DOMINIOS[m].nome} | ${NIVEIS[n].nome} | ${CIRCUITOS[c].nome} | ${MODALIDADES[o].nome}`
+                        codigo: `${DOMINIOS[m].abrev}-${NIVEIS[n].nome.slice(0,3)}-${circuito.abrev}-${MODALIDADES[o].abrev}`,
+                        descricao: `${DOMINIOS[m].nome} | ${NIVEIS[n].nome} | ${circuito.nome} | ${MODALIDADES[o].nome}`,
+                        circuitoNome: circuito.nome,
+                        circuitoAbrev: circuito.abrev
                     });
                     id++;
                 }
