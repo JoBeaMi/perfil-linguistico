@@ -412,6 +412,7 @@ function inicializarEventListeners() {
     // Botões principais
     document.getElementById('btn-gerar').addEventListener('click', gerarPerfil);
     document.getElementById('btn-limpar').addEventListener('click', limparFormulario);
+    document.getElementById('btn-guardar').addEventListener('click', guardarCasoCloud);
     document.getElementById('btn-exemplo').addEventListener('click', carregarExemplo);
     document.getElementById('btn-export').addEventListener('click', () => abrirModal('modal-export'));
     document.getElementById('btn-add-prova').addEventListener('click', adicionarProva);
@@ -1103,6 +1104,49 @@ function adicionarProva() {
     document.getElementById('conversion-value').className = 'conversion-value';
     
     mostrarToast(`${option.text}: ${comp}/10`, 'success');
+}
+
+// ============================================================================
+// GUARDAR NA CLOUD
+// ============================================================================
+
+async function guardarCasoCloud() {
+    // Verificar se está autenticado
+    if (!API.isAuthenticated()) {
+        mostrarToast('Faça login para guardar casos', 'warning');
+        return;
+    }
+    
+    // Verificar se há dados mínimos
+    const codigo = document.getElementById('caso-id').value.trim();
+    if (!codigo) {
+        mostrarToast('Preencha o código do caso', 'warning');
+        return;
+    }
+    
+    // Verificar se há competências preenchidas
+    const temDados = casoActual.competencias.some(c => c !== null);
+    if (!temDados) {
+        mostrarToast('Preencha pelo menos uma competência', 'warning');
+        return;
+    }
+    
+    // Actualizar dados do caso
+    casoActual.codigo = codigo;
+    casoActual.nome = document.getElementById('caso-nome').value.trim();
+    casoActual.idade = document.getElementById('caso-idade').value.trim();
+    casoActual.data = document.getElementById('caso-data').value;
+    casoActual.anoEscolar = document.getElementById('caso-esc').value;
+    casoActual.avaliador = document.getElementById('caso-aval').value.trim();
+    casoActual.timestamp = Date.now();
+    
+    try {
+        await API.guardarCaso(casoActual);
+        mostrarToast('Caso guardado com sucesso!', 'success');
+    } catch (error) {
+        console.error('Erro ao guardar:', error);
+        mostrarToast('Erro ao guardar: ' + error.message, 'error');
+    }
 }
 
 // ============================================================================
