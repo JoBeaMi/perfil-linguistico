@@ -317,17 +317,16 @@ function mostrarApp() {
     if (loginScreen) loginScreen.style.display = 'none';
     if (appContent) appContent.style.display = 'block';
     
-    // Forçar resize do radar após mostrar (canvas precisa de estar visível)
-    // Tentar várias vezes para garantir que app.js já inicializou
-    const tentarResize = (tentativas) => {
+    // Inicializar/redesenhar radar após mostrar app
+    setTimeout(() => {
+        if (typeof inicializarRadar === 'function') {
+            inicializarRadar();
+        }
         if (typeof radarChart !== 'undefined' && radarChart) {
             radarChart.resize();
             radarChart.desenhar();
-        } else if (tentativas > 0) {
-            setTimeout(() => tentarResize(tentativas - 1), 100);
         }
-    };
-    setTimeout(() => tentarResize(10), 100);
+    }, 150);
 }
 
 function mostrarLogin() {

@@ -12,15 +12,36 @@ let radarChart = null;
 let settings = carregarSettings();
 let escritaAtiva = true;
 let planoActual = null;
+let radarInicializado = false;
 
 // ============================================================================
 // INICIALIZAÇÃO
 // ============================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar radar
-    radarChart = new RadarChart('radar-canvas');
+function inicializarRadar() {
+    if (radarInicializado) return;
     
+    const canvas = document.getElementById('radar-canvas');
+    const appContent = document.getElementById('app-content');
+    
+    // Só inicializar se o canvas estiver visível
+    if (!canvas || !appContent || appContent.style.display === 'none') {
+        return false;
+    }
+    
+    try {
+        radarChart = new RadarChart('radar-canvas');
+        radarChart.desenhar();
+        radarInicializado = true;
+        console.log('Radar inicializado com sucesso');
+        return true;
+    } catch (e) {
+        console.error('Erro ao inicializar radar:', e);
+        return false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     // Aplicar tema guardado
     if (settings.theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -36,16 +57,16 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarEventListeners();
     inicializarAuth();
     
+    // Tentar inicializar radar (pode falhar se app-content estiver escondido)
+    inicializarRadar();
+    
     // Listener para sincronizar fullscreen do browser com o CSS
     document.addEventListener('fullscreenchange', () => {
         if (!document.fullscreenElement && document.body.classList.contains('fullscreen')) {
             document.body.classList.remove('fullscreen');
-            setTimeout(() => radarChart.resize(), 100);
+            if (radarChart) setTimeout(() => radarChart.resize(), 100);
         }
     });
-    
-    // Desenhar radar vazio
-    radarChart.desenhar();
     
     // Esconder loading
     setTimeout(() => {
