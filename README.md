@@ -8,7 +8,6 @@ Ferramenta web para caracterização, leitura e interpretação de perfis lingu�
 Baseada no modelo conceptual da linguagem oral (Alves, 2019)
 
 [![Demo](https://img.shields.io/badge/Demo-Online-00a99d?style=for-the-badge)](https://jobeami.github.io/perfil-linguistico)
-[![License](https://img.shields.io/badge/Licença-MIT-blue?style=for-the-badge)](LICENSE)
 
 **Conceptualização e operacionalização:** Joana Miguel  
 CAIDI · CLUNL
@@ -134,9 +133,13 @@ Freitas, M. J., Lousada, M., & Alves, D. C. (Eds.). (2022). *Linguística clíni
 
 ---
 
-## Licença
+## Direitos de Autor
 
-Este projecto está licenciado sob a [MIT License](LICENSE).
+**© 2025 Joana Miguel · Todos os direitos reservados**
+
+Este software e a sua documentação são propriedade exclusiva da autora. Não é permitida a cópia, modificação, distribuição ou utilização sem autorização prévia e expressa.
+
+Para pedidos de utilização ou colaboração, contactar através do CAIDI.
 
 ---
 
@@ -145,7 +148,3 @@ Este projecto está licenciado sob a [MIT License](LICENSE).
 *Desenvolvido com ♥ para a prática clínica e investigação em linguística*
 
 </div>
-
-**CAIDI** - Centro de Apoio e Intervenção no Desenvolvimento Infantil
-
-*"Não precisamos de saber SE é PDL ou Dislexia — precisamos de saber QUAL É O PERFIL para intervir."*
