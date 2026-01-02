@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Competência Linguística | CAIDI</title>
-    <meta name="description" content="Ferramenta profissional de avaliação linguística baseada num modelo conceptual da linguagem oral, representado pelo &quot;Quadrant of Linguistic Manifestations&quot; (Alves, 2019)">
+    <title>PERLIM | Perfil Linguístico Multidimensional</title>
+    <meta name="description" content="Ferramenta profissional de avaliação linguística baseada no modelo conceptual da linguagem oral (Alves, 2019)">
     <meta name="author" content="Joana Miguel / CAIDI">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,60 +19,72 @@
         <p>A carregar...</p>
     </div>
 
-    <!-- Ecrã de Login -->
+    <!-- Ecrã de Login (Split Layout) -->
     <div id="login-screen" class="login-screen">
-        <div class="login-container">
-            <div class="login-header">
+        <!-- Lado Esquerdo - Branding -->
+        <div class="login-brand">
+            <div class="login-brand-content">
                 <img src="logo-branco.png" alt="CAIDI" class="login-logo">
                 <h1>PERLIM</h1>
-                <p>
-                    Perfil Linguístico Multidimensional ·
-                    Modelo conceptual: Alves (2019) ·
-                    Operacionalização: Joana Miguel
+                <p class="login-brand-subtitle">Perfil Linguístico Multidimensional</p>
+                <p class="login-brand-description">
+                    Ferramenta profissional para caracterização, leitura e interpretação 
+                    de perfis linguísticos de forma multidimensional.
+                </p>
+                <p class="login-brand-credits">
+                    <strong>Modelo conceptual:</strong> Alves (2019)<br>
+                    <strong>Operacionalização:</strong> Joana Miguel<br>
+                    CAIDI · CLUNL
                 </p>
             </div>
+            <!-- Decoração radar -->
+            <div class="login-radar-decoration">
+                <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="0.5"/>
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="white" stroke-width="0.5"/>
+                    <circle cx="50" cy="50" r="25" fill="none" stroke="white" stroke-width="0.5"/>
+                    <circle cx="50" cy="50" r="15" fill="none" stroke="white" stroke-width="0.5"/>
+                    <line x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="0.3"/>
+                    <line x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="0.3"/>
+                </svg>
+            </div>
+        </div>
 
-            <div class="login-box">
-                <div class="login-tabs">
-                    <button class="login-tab active" data-tab="login">Entrar</button>
-                    <button class="login-tab" data-tab="register">Criar conta</button>
+        <!-- Lado Direito - Formulário -->
+        <div class="login-form-side">
+            <div class="login-form-header">
+                <h2>Bem-vindo</h2>
+                <p>Entre na sua conta para continuar</p>
+            </div>
+
+            <div class="login-tabs">
+                <button class="login-tab active" data-tab="login">Entrar</button>
+                <button class="login-tab" data-tab="register">Criar conta</button>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group" id="login-nome-group" style="display:none">
+                    <label for="login-nome">Nome</label>
+                    <input type="text" id="login-nome" placeholder="Nome completo">
                 </div>
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="email@exemplo.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required minlength="6">
+                </div>
+                <div class="form-error" id="login-error"></div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit">Entrar</button>
+            </form>
 
-                <form id="login-form">
-                    <div class="form-group" id="login-nome-group" style="display:none">
-                        <label for="login-nome">Nome</label>
-                        <input type="text" id="login-nome" placeholder="Nome completo">
-                    </div>
+            <p class="login-info">
+                Ferramenta de apoio à caracterização do perfil linguístico e à decisão clínica.
+            </p>
 
-                    <div class="form-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" placeholder="email@exemplo.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" placeholder="••••••••" required minlength="6">
-                    </div>
-
-                    <div class="form-error" id="login-error"></div>
-
-                    <button type="submit"
-                            class="btn btn-primary btn-block btn-lg"
-                            id="login-submit">
-                        Entrar
-                    </button>
-                </form>
-
-                <p class="login-info">
-                    <small>
-                        Ferramenta profissional de apoio à caracterização do perfil linguístico
-                        e à decisão clínica. Os dados são armazenados de forma segura.
-                    </small>
-                </p>
-            </div>
-
-            <div class="login-footer">
-                <p>CAIDI — Centro de Apoio e Intervenção no Desenvolvimento Infantil</p>
+            <div class="login-form-footer">
+                <p>© 2025 Joana Miguel · Todos os direitos reservados</p>
             </div>
         </div>
     </div>
@@ -81,549 +92,477 @@
     <!-- App Content (escondido até login) -->
     <div id="app-content" class="app-content" style="display:none">
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <img src="logo-branco.png" alt="CAIDI" class="logo-img">
-                <div class="logo-text">
-                    <h1>Perfil de Competência Linguística</h1>
-                    <p>Quadrantes de Alves (2019) · Operacionalização: J. Miguel</p>
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="logo-branco.png" alt="CAIDI" class="logo-img">
+                    <div class="logo-text">
+                        <h1>PERLIM</h1>
+                        <p>Perfil Linguístico Multidimensional</p>
+                    </div>
                 </div>
-            </div>
-            <nav class="header-nav">
-                <button class="btn-icon" id="btn-dashboard" title="Dashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                </button>
-                <button class="btn-icon" id="btn-history" title="Histórico de Casos (H)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </button>
-                <button class="btn-icon" id="btn-info" title="Informações (I)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
-                </button>
-                <button class="btn-icon" id="btn-theme" title="Alternar Tema (T)">
-                    <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-                </button>
-                <button class="btn-icon" id="btn-fullscreen" title="Ecrã Completo (F)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
-                </button>
-                <div class="user-menu" id="user-menu">
-                    <button class="btn-icon btn-user" id="btn-user" title="Utilizador">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span class="user-name" id="user-name"></span>
+                <nav class="header-nav">
+                    <button class="btn-icon" id="btn-dashboard" title="Dashboard">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     </button>
-                    <div class="user-dropdown" id="user-dropdown">
-                        <div class="user-info" id="user-info"></div>
-                        <button class="dropdown-item" id="btn-logout">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                            Terminar Sessão
+                    <button class="btn-icon" id="btn-history" title="Histórico de Casos (H)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-info" title="Informações (I)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-theme" title="Alternar Tema (T)">
+                        <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                        <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-fullscreen" title="Ecrã Completo (F)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+                    </button>
+                    <div class="user-menu" id="user-menu">
+                        <button class="btn-icon btn-user" id="btn-user" title="Utilizador">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span class="user-name" id="user-name"></span>
+                        </button>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-info" id="user-info"></div>
+                            <button class="dropdown-item" id="btn-logout">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                                Terminar Sessão
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Identificação -->
+                <section class="card" id="card-identificacao">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Identificação
+                        </h2>
+                        <button class="btn-mini" id="btn-load-case" title="Carregar caso">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                         </button>
                     </div>
-                </div>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <!-- Identificação -->
-            <section class="card" id="card-identificacao">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        Identificação
-                    </h2>
-                    <button class="btn-mini" id="btn-load-case" title="Carregar caso">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="caso-id">Código</label>
-                            <input type="text" id="caso-id" placeholder="C001" data-testid="caso-id">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="caso-id">Código</label>
+                                <input type="text" id="caso-id" placeholder="C001" data-testid="caso-id">
+                            </div>
+                            <div class="form-group">
+                                <label for="caso-idade">Idade</label>
+                                <input type="text" id="caso-idade" placeholder="7;4" data-testid="caso-idade">
+                                <span class="input-hint">Formato: anos;meses</span>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="caso-idade">Idade</label>
-                            <input type="text" id="caso-idade" placeholder="7;4" data-testid="caso-idade">
-                            <span class="input-hint">Formato: anos;meses</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="caso-nome">Nome</label>
-                        <input type="text" id="caso-nome" placeholder="Nome do caso" data-testid="caso-nome">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="caso-data">Data</label>
-                            <input type="date" id="caso-data" data-testid="caso-data">
-                        </div>
-                        <div class="form-group">
-                            <label for="caso-esc">Ano Escolar</label>
-                            <select id="caso-esc" data-testid="caso-esc">
-                                <option value="">Selecione</option>
-                                <option value="pre">Pré-escolar</option>
-                                <option value="1">1º ano</option>
-                                <option value="2">2º ano</option>
-                                <option value="3">3º ano</option>
-                                <option value="4">4º ano+</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="caso-aval">Avaliador</label>
-                        <input type="text" id="caso-aval" placeholder="TF" data-testid="caso-aval">
-                    </div>
-                    <div class="info-box" id="esc-info" style="display:none">
-                        <span id="esc-msg"></span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Dados de Entrada -->
-            <section class="card" id="card-dados">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        Dados
-                    </h2>
-                </div>
-                <div class="card-body">
-                    <div class="tabs" role="tablist">
-                        <button class="tab active" data-tab="seg" role="tab" aria-selected="true">Por Segmento</button>
-                        <button class="tab" data-tab="prova" role="tab" aria-selected="false">Por Prova</button>
-                    </div>
-
-                    <!-- Tab Segmento -->
-                    <div id="tab-seg" class="tab-content active">
-                        <div class="module-tabs">
-                            <button class="mod-tab active" data-mod="0" style="--mod-color: var(--mod-fono)">Fono</button>
-                            <button class="mod-tab" data-mod="1" style="--mod-color: var(--mod-morf)">Morf</button>
-                            <button class="mod-tab" data-mod="2" style="--mod-color: var(--mod-sint)">Sint</button>
-                            <button class="mod-tab" data-mod="3" style="--mod-color: var(--mod-sem)">Sem</button>
-                            <button class="mod-tab" data-mod="4" style="--mod-color: var(--mod-prag)">Prag</button>
-                        </div>
-                        <div id="mod-panels"></div>
-                    </div>
-
-                    <!-- Tab Prova -->
-                    <div id="tab-prova" class="tab-content">
-                        <div class="form-group">
-                            <label for="prova-sel">Prova</label>
-                            <select id="prova-sel" data-testid="prova-sel">
-                                <option value="">Selecione uma prova</option>
-                            </select>
+                            <label for="caso-nome">Nome</label>
+                            <input type="text" id="caso-nome" placeholder="Nome do caso" data-testid="caso-nome">
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="prova-esc">Escala</label>
-                                <select id="prova-esc" data-testid="prova-esc">
-                                    <option value="perc">Percentil</option>
-                                    <option value="qi">QI</option>
-                                    <option value="z">Nota Z</option>
-                                    <option value="t">Nota T</option>
-                                </select>
+                                <label for="caso-data">Data</label>
+                                <input type="date" id="caso-data" data-testid="caso-data">
                             </div>
                             <div class="form-group">
-                                <label for="prova-val">Valor</label>
-                                <input type="number" id="prova-val" placeholder="25" data-testid="prova-val">
+                                <label for="caso-esc">Ano Escolar</label>
+                                <select id="caso-esc" data-testid="caso-esc">
+                                    <option value="">Selecione</option>
+                                    <option value="pre">Pré-escolar</option>
+                                    <option value="1">1º ano</option>
+                                    <option value="2">2º ano</option>
+                                    <option value="3">3º ano</option>
+                                    <option value="4">4º ano+</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="conversion-display" id="conversion-display">
-                            <span class="conversion-label">Competência:</span>
-                            <span class="conversion-value" id="conversion-value">—</span>
+                        <div class="form-group">
+                            <label for="caso-aval">Avaliador</label>
+                            <input type="text" id="caso-aval" placeholder="TF" data-testid="caso-aval">
                         </div>
-                        <button class="btn btn-primary btn-block" id="btn-add-prova" data-testid="btn-add-prova">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
-                            Adicionar Resultado
+                        <div class="info-box" id="esc-info" style="display:none">
+                            <span id="esc-msg"></span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Dados de Entrada -->
+                <section class="card" id="card-dados">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Dados
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="tabs" role="tablist">
+                            <button class="tab active" data-tab="seg" role="tab" aria-selected="true">Por Segmento</button>
+                            <button class="tab" data-tab="prova" role="tab" aria-selected="false">Por Prova</button>
+                        </div>
+
+                        <!-- Tab Segmento -->
+                        <div id="tab-seg" class="tab-content active">
+                            <div class="module-tabs">
+                                <button class="mod-tab active" data-mod="0" style="--mod-color: var(--mod-fono)">Fono</button>
+                                <button class="mod-tab" data-mod="1" style="--mod-color: var(--mod-morf)">Morf</button>
+                                <button class="mod-tab" data-mod="2" style="--mod-color: var(--mod-sint)">Sint</button>
+                                <button class="mod-tab" data-mod="3" style="--mod-color: var(--mod-sem)">Sem</button>
+                                <button class="mod-tab" data-mod="4" style="--mod-color: var(--mod-prag)">Prag</button>
+                            </div>
+                            <div id="mod-panels"></div>
+                        </div>
+
+                        <!-- Tab Prova -->
+                        <div id="tab-prova" class="tab-content">
+                            <div class="form-group">
+                                <label for="prova-sel">Prova</label>
+                                <select id="prova-sel" data-testid="prova-sel">
+                                    <option value="">Selecione uma prova</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="prova-esc">Escala</label>
+                                    <select id="prova-esc" data-testid="prova-esc">
+                                        <option value="perc">Percentil</option>
+                                        <option value="qi">QI</option>
+                                        <option value="z">Nota Z</option>
+                                        <option value="t">Nota T</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prova-val">Valor</label>
+                                    <input type="number" id="prova-val" placeholder="25" data-testid="prova-val">
+                                </div>
+                            </div>
+                            <div class="conversion-display" id="conversion-display">
+                                <span class="conversion-label">Competência:</span>
+                                <span class="conversion-value" id="conversion-value">—</span>
+                            </div>
+                            <button class="btn btn-primary btn-block" id="btn-add-prova" data-testid="btn-add-prova">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                                Adicionar Resultado
+                            </button>
+                            <div id="tarefas-container"></div>
+                            <div id="prova-list" class="prova-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Acções -->
+                <section class="card" id="card-acoes">
+                    <div class="card-body">
+                        <button class="btn btn-primary btn-block btn-lg" id="btn-gerar" data-testid="btn-gerar">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            Gerar Perfil
                         </button>
-                        <div id="tarefas-container"></div>
-                        <div id="prova-list" class="prova-list"></div>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" id="btn-limpar" title="Limpar (Ctrl+L)" data-testid="btn-limpar">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                Limpar
+                            </button>
+                            <button class="btn btn-secondary" id="btn-exemplo" title="Carregar Exemplo (E)" data-testid="btn-exemplo">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
+                                Exemplo
+                            </button>
+                            <button class="btn btn-secondary" id="btn-export" title="Exportar (Ctrl+E)" data-testid="btn-export">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                Exportar
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Main Content Area -->
+            <section class="content">
+                <!-- Radar Chart -->
+                <div class="radar-card" id="radar-card">
+                    <div class="radar-header">
+                        <div class="radar-title-wrap">
+                            <h2 id="radar-title">Perfil Linguístico Multidimensional</h2>
+                            <span class="radar-subtitle" id="radar-subtitle"></span>
+                        </div>
+                        <div class="radar-actions">
+                            <button class="btn-icon btn-sm btn-close-fullscreen" id="btn-close-fullscreen" title="Sair do Ecrã Completo (ESC)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </button>
+                            <button class="btn-icon btn-sm" id="btn-zoom-in" title="Ampliar">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6m-3-3h6"/></svg>
+                            </button>
+                            <button class="btn-icon btn-sm" id="btn-zoom-out" title="Reduzir">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>
+                            </button>
+                            <button class="btn-icon btn-sm" id="btn-download-png" title="Descarregar PNG">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="radar-body">
+                        <div class="radar-wrap" id="radar-wrap">
+                            <canvas id="radar-canvas" width="800" height="800"></canvas>
+                        </div>
+                    </div>
+                    <div class="radar-legend">
+                        <div class="legend-section">
+                            <h4>Zonas de Referência</h4>
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <span class="legend-color zone-red"></span>
+                                    <span>0-3: Dificuldade Acentuada</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color zone-yellow"></span>
+                                    <span>3-5: Dificuldade Moderada</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color zone-white"></span>
+                                    <span>5-10: Desempenho Típico</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="legend-section">
+                            <h4>Anéis Hierárquicos</h4>
+                            <div class="legend-items">
+                                <div class="legend-item"><span class="legend-color" style="background:var(--caidi-turquesa)"></span><span>Domínio Linguístico</span></div>
+                                <div class="legend-item"><span class="legend-color" style="background:#A5D6A7"></span><span>Nível de Processamento</span></div>
+                                <div class="legend-item"><span class="legend-color" style="background:#90CAF9"></span><span>Circuito</span></div>
+                                <div class="legend-item"><span class="legend-color" style="background:#E0E0E0"></span><span>Modalidade</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Dashboard -->
+                <div class="stats-dashboard" id="stats-dashboard" style="display:none">
+                    <h3 class="section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                        Resumo Estatístico
+                    </h3>
+                    <div class="stats-grid" id="stats-grid"></div>
+                </div>
+
+                <!-- Analysis Panel -->
+                <div class="analysis-panel" id="analysis" style="display:none">
+                    <h3 class="section-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        Análise Clínica
+                    </h3>
+                    
+                    <div class="analysis-section">
+                        <h4>Padrões Identificados</h4>
+                        <div id="patterns"></div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h4>Hipóteses Diagnósticas</h4>
+                        <div class="disclaimer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4m0 4h.01"/></svg>
+                            Estas hipóteses requerem confirmação através de avaliação clínica completa.
+                        </div>
+                        <div id="hypotheses"></div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h4>Prioridades de Intervenção</h4>
+                        <div id="intervention"></div>
+                        <button class="btn btn-sm btn-ia" id="btn-abrir-ia" style="margin-top:1rem">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                            🤖 Gerar Plano com IA
+                        </button>
+                    </div>
+
+                    <div class="analysis-section">
+                        <h4>Perfil por Dimensão</h4>
+                        <div id="dimension-charts"></div>
                     </div>
                 </div>
             </section>
+        </main>
 
-            <!-- Acções -->
-            <section class="card" id="card-acoes">
-                <div class="card-body">
-                    <button class="btn btn-primary btn-block btn-lg" id="btn-gerar" data-testid="btn-gerar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        Gerar Perfil
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <img src="logo.png" alt="CAIDI" class="footer-logo">
+                    <div class="footer-text">
+                        <p><strong>PERLIM</strong></p>
+                        <p>Perfil Linguístico Multidimensional</p>
+                    </div>
+                </div>
+                <div class="footer-center">
+                    <p>Desenvolvido por <strong>Joana Miguel</strong></p>
+                    <p>CAIDI · CLUNL</p>
+                </div>
+                <div class="footer-right">
+                    <p class="version">v3.1</p>
+                    <p>Janeiro 2025</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Joana Miguel · Todos os direitos reservados</p>
+                <p class="shortcuts-hint">Atalhos: <kbd>G</kbd> Gerar · <kbd>E</kbd> Exemplo · <kbd>T</kbd> Tema · <kbd>H</kbd> Histórico · <kbd>F</kbd> Ecrã completo</p>
+            </div>
+        </footer>
+
+        <!-- Modals -->
+        <!-- History Modal -->
+        <div class="modal" id="modal-history">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Histórico de Casos
+                    </h2>
+                    <button class="btn-close" data-close-modal>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
-                    <div class="btn-group">
-                        <button class="btn btn-secondary" id="btn-limpar" title="Limpar (Ctrl+L)" data-testid="btn-limpar">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                            Limpar
+                </div>
+                <div class="modal-body">
+                    <div class="history-actions">
+                        <input type="text" id="history-search" placeholder="Pesquisar casos..." class="search-input">
+                        <button class="btn btn-secondary" id="btn-import-json">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            Importar
                         </button>
-                        <button class="btn btn-secondary" id="btn-exemplo" title="Carregar Exemplo (E)" data-testid="btn-exemplo">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
-                            Exemplo
-                        </button>
-                        <button class="btn btn-secondary" id="btn-export" title="Exportar (Ctrl+E)" data-testid="btn-export">
+                        <button class="btn btn-secondary" id="btn-export-all">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                            Exportar
+                            Exportar Todos
                         </button>
                     </div>
+                    <div id="history-list" class="history-list"></div>
                 </div>
-            </section>
-        </aside>
+            </div>
+        </div>
 
-        <!-- Main Content Area -->
-        <section class="content">
-            <!-- Radar Chart -->
-            <div class="radar-card" id="radar-card">
-                <div class="radar-header">
-                    <div class="radar-title-wrap">
-                        <h2 id="radar-title">Perfil de Competência Linguística</h2>
-                        <span class="radar-subtitle" id="radar-subtitle"></span>
+        <!-- Info Modal -->
+        <div class="modal" id="modal-info">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+                        Informações
+                    </h2>
+                    <button class="btn-close" data-close-modal>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-tabs">
+                        <button class="info-tab active" data-info="provas">Léxico de Provas</button>
+                        <button class="info-tab" data-info="conversao">Tabela de Conversão</button>
+                        <button class="info-tab" data-info="modelo">Modelo Teórico</button>
+                        <button class="info-tab" data-info="atalhos">Atalhos</button>
                     </div>
-                    <div class="radar-actions">
-                        <button class="btn-icon btn-sm btn-close-fullscreen" id="btn-close-fullscreen" title="Sair do Ecrã Completo (ESC)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    <div id="info-content" class="info-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div class="modal" id="modal-export">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        Exportar Perfil
+                    </h2>
+                    <button class="btn-close" data-close-modal>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-options">
+                        <button class="export-option" data-export="png">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            <span>PNG</span>
+                            <small>Imagem do radar</small>
                         </button>
-                        <button class="btn-icon btn-sm" id="btn-zoom-in" title="Ampliar">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6m-3-3h6"/></svg>
+                        <button class="export-option" data-export="pdf">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
+                            <span>Relatório</span>
+                            <small>Relatório completo</small>
                         </button>
-                        <button class="btn-icon btn-sm" id="btn-zoom-out" title="Reduzir">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>
+                        <button class="export-option" data-export="json">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                            <span>JSON</span>
+                            <small>Dados estruturados</small>
                         </button>
-                        <button class="btn-icon btn-sm" id="btn-download-png" title="Descarregar PNG">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                        <button class="export-option" data-export="csv">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h2m4 0h2M8 17h2m4 0h2"/></svg>
+                            <span>CSV</span>
+                            <small>Folha de cálculo</small>
                         </button>
                     </div>
                 </div>
-                <div class="radar-body">
-                    <div class="radar-wrap" id="radar-wrap">
-                        <canvas id="radar-canvas" width="800" height="800"></canvas>
-                    </div>
+            </div>
+        </div>
+
+        <!-- Modal Dashboard -->
+        <div class="modal" id="modal-dashboard">
+            <div class="modal-content modal-xl">
+                <div class="modal-header">
+                    <h3>Dashboard</h3>
+                    <button class="modal-close" data-close>&times;</button>
                 </div>
-                <div class="radar-legend">
-                    <div class="legend-section">
-                        <h4>Zonas de Referência</h4>
-                        <div class="legend-items">
-                            <div class="legend-item">
-                                <span class="legend-color zone-red"></span>
-                                <span>0-3: Dificuldade Significativa</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color zone-yellow"></span>
-                                <span>3-5: Dificuldade Provável</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color zone-white"></span>
-                                <span>5-10: Desempenho Típico</span>
-                            </div>
+                <div class="modal-body">
+                    <div class="dashboard-stats" id="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-value" id="stat-total-casos">0</div>
+                            <div class="stat-label">Total de Casos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-value" id="stat-casos-mes">0</div>
+                            <div class="stat-label">Este Mês</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-value" id="stat-media-comp">-</div>
+                            <div class="stat-label">Média Competências</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📝</div>
+                            <div class="stat-value" id="stat-provas-custom">0</div>
+                            <div class="stat-label">Provas Custom</div>
                         </div>
                     </div>
-                    <div class="legend-section">
-                        <h4>Anéis Hierárquicos</h4>
-                        <div class="legend-items">
-                            <div class="legend-item"><span class="legend-color" style="background:var(--caidi-turquesa)"></span><span>Domínio Linguístico</span></div>
-                            <div class="legend-item"><span class="legend-color" style="background:#A5D6A7"></span><span>Nível de Processamento</span></div>
-                            <div class="legend-item"><span class="legend-color" style="background:#90CAF9"></span><span>Circuito</span></div>
-                            <div class="legend-item"><span class="legend-color" style="background:#E0E0E0"></span><span>Modalidade</span></div>
-                        </div>
+                    <div class="dashboard-section">
+                        <h4>Casos Recentes</h4>
+                        <div class="casos-grid" id="casos-recentes"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Statistics Dashboard -->
-            <div class="stats-dashboard" id="stats-dashboard" style="display:none">
-                <h3 class="section-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-                    Resumo Estatístico
-                </h3>
-                <div class="stats-grid" id="stats-grid"></div>
-            </div>
-
-            <!-- Analysis Panel -->
-            <div class="analysis-panel" id="analysis" style="display:none">
-                <h3 class="section-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                    Análise Clínica
-                </h3>
-                
-                <div class="analysis-section">
-                    <h4>Padrões Identificados</h4>
-                    <div id="patterns"></div>
-                </div>
-                
-                <div class="analysis-section">
-                    <h4>Hipóteses Diagnósticas</h4>
-                    <div class="disclaimer">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4m0 4h.01"/></svg>
-                        Estas hipóteses requerem confirmação através de avaliação clínica completa.
-                    </div>
-                    <div id="hypotheses"></div>
-                </div>
-                
-                <div class="analysis-section">
-                    <h4>Prioridades de Intervenção</h4>
-                    <div id="intervention"></div>
-                    <button class="btn btn-sm btn-ia" id="btn-abrir-ia" style="margin-top:1rem">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
-                        🤖 Gerar Plano com IA
-                    </button>
-                </div>
-
-                <div class="analysis-section">
-                    <h4>Perfil por Dimensão</h4>
-                    <div id="dimension-charts"></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <img src="logo.png" alt="CAIDI" class="footer-logo">
-                <div class="footer-text">
-                    <p><strong>Perfil de Competência Linguística</strong></p>
-                    <p>Baseado nos Quadrantes de Alves (2019)</p>
-                </div>
-            </div>
-            <div class="footer-center">
-                <p>Desenvolvido por <strong>Joana Miguel</strong></p>
-                <p>CAIDI - Centro de Apoio e Intervenção no Desenvolvimento Infantil</p>
-            </div>
-            <div class="footer-right">
-                <p class="version">v3.0</p>
-                <p>Agosto 2025</p>
-            </div>
         </div>
-        <div class="footer-bottom">
-            <p>© 2025 CAIDI · Todos os direitos reservados</p>
-            <p class="shortcuts-hint">Atalhos: <kbd>G</kbd> Gerar · <kbd>E</kbd> Exemplo · <kbd>T</kbd> Tema · <kbd>H</kbd> Histórico · <kbd>F</kbd> Ecrã completo</p>
-        </div>
-    </footer>
 
-    <!-- Modals -->
-    <!-- History Modal -->
-    <div class="modal" id="modal-history">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h2>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Histórico de Casos
-                </h2>
-                <button class="btn-close" data-close-modal>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="history-actions">
-                    <input type="text" id="history-search" placeholder="Pesquisar casos..." class="search-input">
-                    <button class="btn btn-secondary" id="btn-import-json">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                        Importar
-                    </button>
-                    <button class="btn btn-secondary" id="btn-export-all">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                        Exportar Todos
-                    </button>
+        <!-- Modal Editar Prova Aplicada -->
+        <div class="modal" id="modal-editar-prova">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Editar Prova Aplicada</h3>
+                    <button class="modal-close" data-close>&times;</button>
                 </div>
-                <div id="history-list" class="history-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Info Modal -->
-    <div class="modal" id="modal-info">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h2>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
-                    Informações
-                </h2>
-                <button class="btn-close" data-close-modal>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="info-tabs">
-                    <button class="info-tab active" data-info="provas">Léxico de Provas</button>
-                    <button class="info-tab" data-info="conversao">Tabela de Conversão</button>
-                    <button class="info-tab" data-info="modelo">Modelo Teórico</button>
-                    <button class="info-tab" data-info="atalhos">Atalhos</button>
-                </div>
-                <div id="info-content" class="info-content"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Export Modal -->
-    <div class="modal" id="modal-export">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    Exportar Perfil
-                </h2>
-                <button class="btn-close" data-close-modal>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="export-options">
-                    <button class="export-option" data-export="png">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                        <span>PNG</span>
-                        <small>Imagem do radar</small>
-                    </button>
-                    <button class="export-option" data-export="pdf">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
-                        <span>Relatório</span>
-                        <small>Relatório completo</small>
-                    </button>
-                    <button class="export-option" data-export="json">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                        <span>JSON</span>
-                        <small>Dados estruturados</small>
-                    </button>
-                    <button class="export-option" data-export="csv">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h2m4 0h2M8 17h2m4 0h2"/></svg>
-                        <span>CSV</span>
-                        <small>Folha de cálculo</small>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Login/Registo -->
-    <div class="modal" id="modal-auth">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="auth-title">Entrar</h3>
-                <button class="modal-close" data-close>&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-auth="login">Entrar</button>
-                    <button class="auth-tab" data-auth="register">Criar Conta</button>
-                </div>
-                <form id="auth-form">
-                    <div class="form-group" id="auth-nome-group" style="display:none">
-                        <label>Nome</label>
-                        <input type="text" id="auth-nome" placeholder="O seu nome">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Prova</label>
+                        <input type="text" id="edit-prova-nome" readonly class="input-readonly">
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="auth-email" placeholder="email@exemplo.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" id="auth-password" placeholder="••••••••" required>
-                    </div>
-                    <div class="form-error" id="auth-error"></div>
-                    <button type="submit" class="btn btn-primary btn-block" id="auth-submit">Entrar</button>
-                </form>
-                <p class="auth-info">
-                    <small>Os seus dados ficam guardados de forma segura no servidor.</small>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Dashboard -->
-    <div class="modal" id="modal-dashboard">
-        <div class="modal-content modal-xl">
-            <div class="modal-header">
-                <h3>Dashboard</h3>
-                <button class="modal-close" data-close>&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="dashboard-stats" id="dashboard-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">📊</div>
-                        <div class="stat-value" id="stat-total-casos">0</div>
-                        <div class="stat-label">Total de Casos</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📅</div>
-                        <div class="stat-value" id="stat-casos-mes">0</div>
-                        <div class="stat-label">Este Mês</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-value" id="stat-media-comp">-</div>
-                        <div class="stat-label">Média Competências</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📝</div>
-                        <div class="stat-value" id="stat-provas-custom">0</div>
-                        <div class="stat-label">Provas Custom</div>
-                    </div>
-                </div>
-                <div class="dashboard-section">
-                    <h4>Casos Recentes</h4>
-                    <div class="casos-grid" id="casos-recentes"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Editar Prova Aplicada -->
-    <div class="modal" id="modal-editar-prova">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Prova Aplicada</h3>
-                <button class="modal-close" data-close>&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Prova</label>
-                    <input type="text" id="edit-prova-nome" readonly class="input-readonly">
-                </div>
-                <div class="form-group">
-                    <label>Valor Obtido</label>
-                    <input type="number" id="edit-prova-valor" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label>Escala</label>
-                    <select id="edit-prova-escala">
-                        <option value="z">Pontuação Z</option>
-                        <option value="t">Pontuação T</option>
-                        <option value="pc">Percentil</option>
-                        <option value="pe">Pontuação Escalar</option>
-                        <option value="qi">QI/Standard</option>
-                        <option value="comp">Competência (0-10)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Competência Calculada</label>
-                    <input type="text" id="edit-prova-comp" readonly class="input-readonly">
-                </div>
-                <input type="hidden" id="edit-prova-idx">
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" data-close>Cancelar</button>
-                    <button class="btn btn-primary" id="btn-salvar-edicao-prova">Guardar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Editar Prova Custom -->
-    <div class="modal" id="modal-editar-prova-custom">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h3>Editar Prova Personalizada</h3>
-                <button class="modal-close" data-close>&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Nome da Prova</label>
-                        <input type="text" id="edit-custom-nome" placeholder="Ex: Prova de Nomeação">
+                        <label>Valor Obtido</label>
+                        <input type="number" id="edit-prova-valor" step="0.1">
                     </div>
                     <div class="form-group">
                         <label>Escala</label>
-                        <select id="edit-custom-escala">
+                        <select id="edit-prova-escala">
                             <option value="z">Pontuação Z</option>
                             <option value="t">Pontuação T</option>
                             <option value="pc">Percentil</option>
@@ -632,76 +571,148 @@
                             <option value="comp">Competência (0-10)</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Domínio Principal</label>
-                    <select id="edit-custom-dominio">
-                        <option value="Fonológico">Fonológico</option>
-                        <option value="Morfológico">Morfológico</option>
-                        <option value="Sintático">Sintático</option>
-                        <option value="Semântico">Semântico</option>
-                        <option value="Pragmático">Pragmático</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Segmentos Avaliados</label>
-                    <div class="segmentos-grid" id="edit-custom-segmentos"></div>
-                </div>
-                <input type="hidden" id="edit-custom-id">
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" data-close>Cancelar</button>
-                    <button class="btn btn-danger" id="btn-eliminar-prova-custom">Eliminar</button>
-                    <button class="btn btn-primary" id="btn-salvar-prova-custom">Guardar</button>
+                    <div class="form-group">
+                        <label>Competência Calculada</label>
+                        <input type="text" id="edit-prova-comp" readonly class="input-readonly">
+                    </div>
+                    <input type="hidden" id="edit-prova-idx">
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" data-close>Cancelar</button>
+                        <button class="btn btn-primary" id="btn-salvar-edicao-prova">Guardar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Gerar Plano IA -->
-    <div class="modal" id="modal-ia">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h3>🤖 Plano Terapêutico com IA</h3>
-                <button class="modal-close" data-close>&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="ia-intro">
-                    <p>O sistema irá analisar o perfil linguístico e gerar um plano terapêutico personalizado. <strong>Nota:</strong> Esta funcionalidade requer configuração adicional.</p>
+        <!-- Modal Editar Prova Custom -->
+        <div class="modal" id="modal-editar-prova-custom">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h3>Editar Prova Personalizada</h3>
+                    <button class="modal-close" data-close>&times;</button>
                 </div>
-                <div class="form-group">
-                    <label>Contexto Adicional (opcional)</label>
-                    <textarea id="ia-contexto" rows="3" placeholder="Informações adicionais relevantes: história clínica, observações, objectivos específicos da família..."></textarea>
-                </div>
-                <div class="ia-loading" id="ia-loading" style="display:none">
-                    <div class="loading-spinner"></div>
-                    <p>A gerar plano terapêutico...</p>
-                </div>
-                <div class="ia-result" id="ia-result" style="display:none"></div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" data-close>Cancelar</button>
-                    <button class="btn btn-primary" id="btn-gerar-plano-ia">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"/><path d="M12 6v6l4 2"/></svg>
-                        Gerar Plano
-                    </button>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome da Prova</label>
+                            <input type="text" id="edit-custom-nome" placeholder="Ex: Prova de Nomeação">
+                        </div>
+                        <div class="form-group">
+                            <label>Escala</label>
+                            <select id="edit-custom-escala">
+                                <option value="z">Pontuação Z</option>
+                                <option value="t">Pontuação T</option>
+                                <option value="pc">Percentil</option>
+                                <option value="pe">Pontuação Escalar</option>
+                                <option value="qi">QI/Standard</option>
+                                <option value="comp">Competência (0-10)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Domínio Principal</label>
+                        <select id="edit-custom-dominio">
+                            <option value="Fonológico">Fonológico</option>
+                            <option value="Morfológico">Morfológico</option>
+                            <option value="Sintático">Sintático</option>
+                            <option value="Semântico">Semântico</option>
+                            <option value="Pragmático">Pragmático</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Segmentos Avaliados</label>
+                        <div class="segmentos-grid" id="edit-custom-segmentos"></div>
+                    </div>
+                    <input type="hidden" id="edit-custom-id">
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" data-close>Cancelar</button>
+                        <button class="btn btn-danger" id="btn-eliminar-prova-custom">Eliminar</button>
+                        <button class="btn btn-primary" id="btn-salvar-prova-custom">Guardar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Comparação Temporal -->
-    <div class="modal" id="modal-comparacao">
-        <div class="modal-content modal-xl">
-            <div class="modal-header">
-                <h3>📈 Evolução Temporal</h3>
-                <button class="modal-close" data-close>&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="comparacao-container" id="comparacao-container">
-                    <p class="text-muted">Seleccione um caso com histórico para ver a evolução.</p>
+        <!-- Modal Gerar Plano IA -->
+        <div class="modal" id="modal-ia">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h3>🤖 Plano Terapêutico com IA</h3>
+                    <button class="modal-close" data-close>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="ia-intro">
+                        <p>O sistema irá analisar o perfil linguístico e gerar um plano terapêutico personalizado. <strong>Nota:</strong> Esta funcionalidade requer configuração adicional.</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Contexto Adicional (opcional)</label>
+                        <textarea id="ia-contexto" rows="3" placeholder="Informações adicionais relevantes: história clínica, observações, objectivos específicos da família..."></textarea>
+                    </div>
+                    <div class="ia-loading" id="ia-loading" style="display:none">
+                        <div class="loading-spinner"></div>
+                        <p>A gerar plano terapêutico...</p>
+                    </div>
+                    <div class="ia-result" id="ia-result" style="display:none"></div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" data-close>Cancelar</button>
+                        <button class="btn btn-primary" id="btn-gerar-plano-ia">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                            Gerar Plano
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Modal Comparação Temporal -->
+        <div class="modal" id="modal-comparacao">
+            <div class="modal-content modal-xl">
+                <div class="modal-header">
+                    <h3>📈 Evolução Temporal</h3>
+                    <button class="modal-close" data-close>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="comparacao-container" id="comparacao-container">
+                        <p class="text-muted">Seleccione um caso com histórico para ver a evolução.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Auth (legacy) -->
+        <div class="modal" id="modal-auth">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="auth-title">Entrar</h3>
+                    <button class="modal-close" data-close>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-auth="login">Entrar</button>
+                        <button class="auth-tab" data-auth="register">Criar Conta</button>
+                    </div>
+                    <form id="auth-form">
+                        <div class="form-group" id="auth-nome-group" style="display:none">
+                            <label>Nome</label>
+                            <input type="text" id="auth-nome" placeholder="O seu nome">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="auth-email" placeholder="email@exemplo.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="auth-password" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-error" id="auth-error"></div>
+                        <button type="submit" class="btn btn-primary btn-block" id="auth-submit">Entrar</button>
+                    </form>
+                    <p class="auth-info">
+                        <small>Os seus dados ficam guardados de forma segura no servidor.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
 
     </div><!-- Fim do app-content -->
 
