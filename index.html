@@ -718,6 +718,286 @@
             </div>
         </div>
 
+        <!-- Modal Nova Criança -->
+        <div class="modal" id="modal-crianca">
+            <div class="modal-content modal-xl">
+                <div class="modal-header">
+                    <h2>👤 Ficha da Criança</h2>
+                    <button class="btn-close" data-close-modal>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-crianca">
+                        <!-- Código automático -->
+                        <div class="crianca-codigo" id="crianca-codigo-display">
+                            <span class="codigo-label">Código:</span>
+                            <span class="codigo-valor" id="crianca-codigo">Será gerado automaticamente</span>
+                        </div>
+
+                        <!-- Identificação básica -->
+                        <fieldset class="form-section">
+                            <legend>Identificação</legend>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label for="crianca-nome">Nome completo *</label>
+                                    <input type="text" id="crianca-nome" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="crianca-dn">Data de nascimento *</label>
+                                    <input type="date" id="crianca-dn" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="crianca-sexo">Sexo</label>
+                                    <select id="crianca-sexo">
+                                        <option value="">Selecione</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Feminino</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label for="crianca-lateralidade">Lateralidade</label>
+                                    <select id="crianca-lateralidade">
+                                        <option value="">Selecione</option>
+                                        <option value="Destro">Destro</option>
+                                        <option value="Esquerdino">Esquerdino/Canhoto</option>
+                                        <option value="Ambidestro">Ambidestro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="crianca-escola">Escola/JI</label>
+                                    <input type="text" id="crianca-escola">
+                                </div>
+                                <div class="form-group">
+                                    <label for="crianca-ano">Ano escolar</label>
+                                    <select id="crianca-ano">
+                                        <option value="">Selecione</option>
+                                        <option value="Creche">Creche</option>
+                                        <option value="JI 3 anos">JI - 3 anos</option>
+                                        <option value="JI 4 anos">JI - 4 anos</option>
+                                        <option value="JI 5 anos">JI - 5 anos</option>
+                                        <option value="1º ano">1º ano</option>
+                                        <option value="2º ano">2º ano</option>
+                                        <option value="3º ano">3º ano</option>
+                                        <option value="4º ano">4º ano</option>
+                                        <option value="5º ano">5º ano</option>
+                                        <option value="6º ano">6º ano</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="crianca-linguas">Língua(s) falada(s) em casa</label>
+                                <input type="text" id="crianca-linguas" placeholder="Ex: Português, Crioulo">
+                            </div>
+                        </fieldset>
+
+                        <!-- Desenvolvimento -->
+                        <fieldset class="form-section collapsible">
+                            <legend class="collapsible-header" onclick="toggleSection(this)">
+                                <span>▼ Desenvolvimento</span>
+                            </legend>
+                            <div class="collapsible-content">
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label for="crianca-palavras">Primeiras palavras</label>
+                                        <input type="text" id="crianca-palavras" placeholder="Ex: 12 meses">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="crianca-frases">Primeiras frases</label>
+                                        <input type="text" id="crianca-frases" placeholder="Ex: 24 meses">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="crianca-passos">Primeiros passos</label>
+                                        <input type="text" id="crianca-passos" placeholder="Ex: 13 meses">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="crianca-preocupacoes">Preocupações com o desenvolvimento?</label>
+                                    <textarea id="crianca-preocupacoes" rows="2" placeholder="Descreva se houve preocupações..."></textarea>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Antecedentes Clínicos -->
+                        <fieldset class="form-section collapsible">
+                            <legend class="collapsible-header" onclick="toggleSection(this)">
+                                <span>▼ Antecedentes Clínicos</span>
+                            </legend>
+                            <div class="collapsible-content">
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-prematuridade" onchange="toggleSubfield(this, 'ac-prematuridade-sem')">
+                                        <span>Prematuridade</span>
+                                        <input type="text" id="ac-prematuridade-sem" class="subfield" placeholder="semanas" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-audicao">
+                                        <span>Problemas de audição</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-visao">
+                                        <span>Problemas de visão</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-neurologico">
+                                        <span>Perturbação neurológica</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-genetico">
+                                        <span>Perturbação genética/síndrome</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-phda">
+                                        <span>PHDA</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-pea">
+                                        <span>PEA</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="ac-outro" onchange="toggleSubfield(this, 'ac-outro-desc')">
+                                        <span>Outro</span>
+                                        <input type="text" id="ac-outro-desc" class="subfield" placeholder="Especifique" disabled>
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Acompanhamentos -->
+                        <fieldset class="form-section collapsible">
+                            <legend class="collapsible-header" onclick="toggleSection(this)">
+                                <span>▼ Acompanhamentos</span>
+                            </legend>
+                            <div class="collapsible-content">
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-tf" onchange="toggleSubfield(this, 'acomp-tf-desde')">
+                                        <span>Terapia da Fala</span>
+                                        <input type="text" id="acomp-tf-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-psic" onchange="toggleSubfield(this, 'acomp-psic-desde')">
+                                        <span>Psicologia</span>
+                                        <input type="text" id="acomp-psic-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-to" onchange="toggleSubfield(this, 'acomp-to-desde')">
+                                        <span>Terapia Ocupacional</span>
+                                        <input type="text" id="acomp-to-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-fisio" onchange="toggleSubfield(this, 'acomp-fisio-desde')">
+                                        <span>Fisioterapia</span>
+                                        <input type="text" id="acomp-fisio-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-pedopsiq" onchange="toggleSubfield(this, 'acomp-pedopsiq-desde')">
+                                        <span>Pedopsiquiatria</span>
+                                        <input type="text" id="acomp-pedopsiq-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-neuroped" onchange="toggleSubfield(this, 'acomp-neuroped-desde')">
+                                        <span>Neuropediatria</span>
+                                        <input type="text" id="acomp-neuroped-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-apoio" onchange="toggleSubfield(this, 'acomp-apoio-desde')">
+                                        <span>Apoio educativo</span>
+                                        <input type="text" id="acomp-apoio-desde" class="subfield" placeholder="desde" disabled>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="acomp-outro" onchange="toggleSubfield(this, 'acomp-outro-desc')">
+                                        <span>Outro</span>
+                                        <input type="text" id="acomp-outro-desc" class="subfield" placeholder="Qual e desde" disabled>
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Antecedentes Familiares -->
+                        <fieldset class="form-section collapsible">
+                            <legend class="collapsible-header" onclick="toggleSection(this)">
+                                <span>▼ Antecedentes Familiares</span>
+                            </legend>
+                            <div class="collapsible-content">
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="af-linguagem">
+                                        <span>Dificuldades de linguagem</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="af-leitura">
+                                        <span>Dificuldades de leitura</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="af-escrita">
+                                        <span>Dificuldades de escrita</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="af-aprendizagem">
+                                        <span>Dificuldades de aprendizagem</span>
+                                    </label>
+                                </div>
+                                <div class="form-group" style="margin-top:1rem">
+                                    <label for="af-quem">Grau de parentesco</label>
+                                    <input type="text" id="af-quem" placeholder="Ex: pai, tio materno">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Diagnóstico e Notas -->
+                        <fieldset class="form-section">
+                            <legend>Diagnóstico e Notas</legend>
+                            <div class="form-group">
+                                <label for="crianca-diagnostico">Diagnóstico / Hipótese diagnóstica</label>
+                                <input type="text" id="crianca-diagnostico" placeholder="Ex: PDL, Atraso de linguagem">
+                            </div>
+                            <div class="form-group">
+                                <label for="crianca-notas">Notas / Observações</label>
+                                <textarea id="crianca-notas" rows="3" placeholder="Outras informações relevantes..."></textarea>
+                            </div>
+                        </fieldset>
+
+                        <input type="hidden" id="crianca-id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-guardar-destaque" id="btn-guardar-crianca">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Guardar Criança
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Seleccionar Criança -->
+        <div class="modal" id="modal-seleccionar-crianca">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <h2>👤 Seleccionar Criança</h2>
+                    <button class="btn-close" data-close-modal>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="crianca-actions">
+                        <input type="text" id="crianca-search" placeholder="Pesquisar por nome ou código..." class="search-input">
+                        <button class="btn btn-primary" id="btn-nova-crianca">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                            Nova Criança
+                        </button>
+                    </div>
+                    <div id="lista-criancas" class="lista-criancas">
+                        <p class="text-muted">A carregar...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div><!-- Fim do app-content -->
 
     <!-- Toast Container -->
