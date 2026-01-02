@@ -307,6 +307,85 @@ function traduzirErro(msg) {
 }
 
 // ============================================================================
+// GESTÃO DO ECRÃ DE LOGIN
+// ============================================================================
+
+function mostrarApp() {
+    const loginScreen = document.getElementById('login-screen');
+    const appContent = document.getElementById('app-content');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (appContent) appContent.style.display = 'block';
+}
+
+function mostrarLogin() {
+    const loginScreen = document.getElementById('login-screen');
+    const appContent = document.getElementById('app-content');
+    
+    if (loginScreen) loginScreen.style.display = 'flex';
+    if (appContent) appContent.style.display = 'none';
+}
+
+function inicializarEcraLogin() {
+    const loginTabs = document.querySelectorAll('.login-tab');
+    const loginForm = document.getElementById('login-form');
+    const loginNomeGroup = document.getElementById('login-nome-group');
+    const loginSubmit = document.getElementById('login-submit');
+    const loginError = document.getElementById('login-error');
+    
+    let loginMode = 'login';
+    
+    // Trocar tabs
+    loginTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            loginTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            loginMode = tab.dataset.tab;
+            
+            if (loginMode === 'register') {
+                loginNomeGroup.style.display = 'block';
+                loginSubmit.textContent = 'Criar Conta';
+            } else {
+                loginNomeGroup.style.display = 'none';
+                loginSubmit.textContent = 'Entrar';
+            }
+            loginError.textContent = '';
+        });
+    });
+    
+    // Submit do form
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const nome = document.getElementById('login-nome').value;
+            
+            loginSubmit.disabled = true;
+            loginSubmit.textContent = loginMode === 'login' ? 'A entrar...' : 'A criar conta...';
+            loginError.textContent = '';
+            
+            try {
+                if (loginMode === 'login') {
+                    await API.login(email, password);
+                } else {
+                    if (!nome) throw new Error('Nome é obrigatório');
+                    await API.register(nome, email, password);
+                }
+                mostrarApp();
+                loginForm.reset();
+            } catch (err) {
+                loginError.textContent = err.message;
+            } finally {
+                loginSubmit.disabled = false;
+                loginSubmit.textContent = loginMode === 'login' ? 'Entrar' : 'Criar Conta';
+            }
+        });
+    }
+}
+
+// ============================================================================
 // INICIALIZAÇÃO - VERIFICAR SESSÃO EXISTENTE
 // ============================================================================
 
@@ -321,14 +400,21 @@ async function inicializarSessao() {
                 nome: session.user.user_metadata?.nome || session.user.email.split('@')[0]
             };
             console.log('Sessão restaurada:', API.user.email);
+            mostrarApp();
+        } else {
+            mostrarLogin();
         }
     } catch (error) {
         console.error('Erro ao verificar sessão:', error);
+        mostrarLogin();
     }
 }
 
-// Verificar sessão ao carregar
-inicializarSessao();
+// Inicializar quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarEcraLogin();
+    inicializarSessao();
+});
 
 // Listener para mudanças de autenticação
 supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -338,8 +424,10 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
             email: session.user.email,
             nome: session.user.user_metadata?.nome || session.user.email.split('@')[0]
         };
+        mostrarApp();
     } else if (event === 'SIGNED_OUT') {
         API.user = null;
+        mostrarLogin();
     }
 });
 
