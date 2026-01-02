@@ -1131,17 +1131,29 @@ async function guardarCasoCloud() {
         return;
     }
     
-    // Actualizar dados do caso
-    casoActual.codigo = codigo;
-    casoActual.nome = document.getElementById('caso-nome').value.trim();
-    casoActual.idade = document.getElementById('caso-idade').value.trim();
-    casoActual.data = document.getElementById('caso-data').value;
-    casoActual.anoEscolar = document.getElementById('caso-esc').value;
-    casoActual.avaliador = document.getElementById('caso-aval').value.trim();
-    casoActual.timestamp = Date.now();
+    // Recolher análise clínica se existir
+    const analise = {
+        padroes: document.getElementById('patterns')?.innerHTML || '',
+        hipoteses: document.getElementById('hypotheses')?.innerHTML || '',
+        intervencao: document.getElementById('intervention')?.innerHTML || ''
+    };
+    
+    // Preparar dados completos
+    const dadosCompletos = {
+        codigo: codigo,
+        nome: document.getElementById('caso-nome').value.trim(),
+        idade: document.getElementById('caso-idade').value.trim(),
+        data: document.getElementById('caso-data').value,
+        anoEscolar: document.getElementById('caso-esc').value,
+        avaliador: document.getElementById('caso-aval').value.trim(),
+        competencias: casoActual.competencias,
+        provasAplicadas: casoActual.provasAplicadas || [],
+        analise: analise,
+        planoIA: planoActual || null
+    };
     
     try {
-        await API.guardarCaso(casoActual);
+        await API.guardarCasoCompleto(dadosCompletos);
         mostrarToast('Caso guardado com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao guardar:', error);
@@ -1293,7 +1305,7 @@ async function carregarCasoGuardado(id) {
             data: caso.data_avaliacao,
             escolaridade: caso.ano_escolar,
             avaliador: caso.avaliador,
-            competencias: new Array(40).fill(null),
+            competencias: caso.competencias || new Array(40).fill(null),
             provasAplicadas: (caso.provas || []).map(p => ({
                 prova: p.prova_nome,
                 sigla: p.prova_sigla,
@@ -1304,16 +1316,23 @@ async function carregarCasoGuardado(id) {
             }))
         };
         
-        // Reconstruir competências a partir das provas
-        casoConvertido.provasAplicadas.forEach(p => {
-            if (p.segs && p.comp !== null) {
-                p.segs.forEach(segIdx => {
-                    if (segIdx >= 0 && segIdx < 40) {
-                        casoConvertido.competencias[segIdx] = p.comp;
-                    }
-                });
-            }
-        });
+        // Se não há competências guardadas, reconstruir a partir das provas
+        if (!caso.competencias || caso.competencias.every(c => c === null)) {
+            casoConvertido.provasAplicadas.forEach(p => {
+                if (p.segs && p.comp !== null) {
+                    p.segs.forEach(segIdx => {
+                        if (segIdx >= 0 && segIdx < 40) {
+                            casoConvertido.competencias[segIdx] = p.comp;
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Carregar plano IA se existir
+        if (caso.plano_ia) {
+            planoActual = caso.plano_ia;
+        }
         
         carregarCaso(casoConvertido);
         fecharModal('modal-history');

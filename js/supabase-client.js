@@ -114,6 +114,52 @@ const API = {
         return caso;
     },
     
+    async guardarCasoCompleto(dados) {
+        if (!this.user) throw new Error('Não autenticado');
+        
+        // Criar caso com todos os dados
+        const { data: novoCaso, error: insertError } = await supabaseClient
+            .from('casos')
+            .insert([{
+                user_id: this.user.id,
+                codigo: dados.codigo || 'SEM_CODIGO',
+                nome: dados.nome || '',
+                idade: dados.idade || '',
+                ano_escolar: dados.anoEscolar || '',
+                data_avaliacao: dados.data || new Date().toISOString().split('T')[0],
+                avaliador: dados.avaliador || '',
+                competencias: dados.competencias || [],
+                analise: dados.analise || null,
+                plano_ia: dados.planoIA || null
+            }])
+            .select()
+            .single();
+        
+        if (insertError) {
+            console.error('Erro insert:', insertError);
+            throw new Error('Erro ao guardar caso: ' + insertError.message);
+        }
+        
+        // Inserir provas aplicadas
+        if (dados.provasAplicadas && dados.provasAplicadas.length > 0) {
+            const provasParaInserir = dados.provasAplicadas.map(p => ({
+                caso_id: novoCaso.id,
+                prova_nome: p.prova || p.nome || '',
+                prova_sigla: p.sigla || '',
+                segmento: Array.isArray(p.segs) ? p.segs.join(',') : (p.segmento || ''),
+                valor: p.valor,
+                escala: p.esc || p.escala || '',
+                competencia: p.comp || p.competencia || 0
+            }));
+            
+            await supabaseClient
+                .from('provas_aplicadas')
+                .insert(provasParaInserir);
+        }
+        
+        return novoCaso;
+    },
+    
     async guardarCaso(caso) {
         if (!this.user) throw new Error('Não autenticado');
         
