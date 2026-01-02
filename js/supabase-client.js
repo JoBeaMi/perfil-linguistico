@@ -323,6 +323,126 @@ const API = {
     },
     
     // ========================================================================
+    // CRIANÇAS
+    // ========================================================================
+    
+    async guardarCrianca(dados) {
+        if (!this.user) throw new Error('Não autenticado');
+        
+        const { data, error } = await supabaseClient
+            .from('criancas')
+            .insert([{
+                user_id: this.user.id,
+                nome: dados.nome,
+                data_nascimento: dados.dataNascimento,
+                sexo: dados.sexo,
+                lateralidade: dados.lateralidade,
+                linguas_casa: dados.linguas,
+                escola: dados.escola,
+                ano_escolar: dados.anoEscolar,
+                idade_primeiras_palavras: dados.primeirasPalavras,
+                idade_primeiras_frases: dados.primeirasFrases,
+                idade_primeiros_passos: dados.primeirosPassos,
+                preocupacoes_desenvolvimento: dados.preocupacoes,
+                antecedentes_clinicos: dados.antecedentesClinicos,
+                acompanhamentos: dados.acompanhamentos,
+                antecedentes_familiares: dados.antecedentesFamiliares,
+                diagnostico: dados.diagnostico,
+                notas: dados.notas
+            }])
+            .select()
+            .single();
+        
+        if (error) {
+            console.error('Erro guardar criança:', error);
+            throw new Error('Erro ao guardar criança: ' + error.message);
+        }
+        return data;
+    },
+    
+    async actualizarCrianca(id, dados) {
+        if (!this.user) throw new Error('Não autenticado');
+        
+        const { data, error } = await supabaseClient
+            .from('criancas')
+            .update({
+                nome: dados.nome,
+                data_nascimento: dados.dataNascimento,
+                sexo: dados.sexo,
+                lateralidade: dados.lateralidade,
+                linguas_casa: dados.linguas,
+                escola: dados.escola,
+                ano_escolar: dados.anoEscolar,
+                idade_primeiras_palavras: dados.primeirasPalavras,
+                idade_primeiras_frases: dados.primeirasFrases,
+                idade_primeiros_passos: dados.primeirosPassos,
+                preocupacoes_desenvolvimento: dados.preocupacoes,
+                antecedentes_clinicos: dados.antecedentesClinicos,
+                acompanhamentos: dados.acompanhamentos,
+                antecedentes_familiares: dados.antecedentesFamiliares,
+                diagnostico: dados.diagnostico,
+                notas: dados.notas,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+        
+        if (error) throw new Error('Erro ao actualizar criança');
+        return data;
+    },
+    
+    async listarCriancas() {
+        if (!this.user) return [];
+        
+        const { data, error } = await supabaseClient
+            .from('criancas')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw new Error('Erro ao carregar crianças');
+        return data || [];
+    },
+    
+    async obterCrianca(id) {
+        if (!this.user) return null;
+        
+        const { data, error } = await supabaseClient
+            .from('criancas')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (error) throw new Error('Erro ao carregar criança');
+        return data;
+    },
+    
+    async eliminarCrianca(id) {
+        if (!this.user) throw new Error('Não autenticado');
+        
+        const { error } = await supabaseClient
+            .from('criancas')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw new Error('Erro ao eliminar criança');
+        return { success: true };
+    },
+    
+    async obterAvaliacoesCrianca(criancaId) {
+        if (!this.user) return [];
+        
+        const { data, error } = await supabaseClient
+            .from('casos')
+            .select('*')
+            .eq('crianca_id', criancaId)
+            .order('data_avaliacao', { ascending: false });
+        
+        if (error) throw new Error('Erro ao carregar avaliações');
+        return data || [];
+    },
+    
+    // ========================================================================
     // IA - PLANO TERAPÊUTICO (desactivado - pode ser adicionado depois)
     // ========================================================================
     

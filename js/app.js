@@ -1436,44 +1436,105 @@ function gerarRelatorio() {
     const hypotheses = document.getElementById('hypotheses')?.innerHTML || '<p>Sem dados</p>';
     const intervention = document.getElementById('intervention')?.innerHTML || '<p>Sem dados</p>';
     
+    // Dados da criança se existir
+    let infoCrianca = '';
+    if (criancaActual) {
+        const ac = criancaActual.antecedentes_clinicos || {};
+        const acomp = criancaActual.acompanhamentos || {};
+        const af = criancaActual.antecedentes_familiares || {};
+        
+        // Antecedentes clínicos activos
+        const acLista = [];
+        if (ac.prematuridade) acLista.push(`Prematuridade (${ac.prematuridadeSemanas || '?'} sem.)`);
+        if (ac.audicao) acLista.push('Problemas de audição');
+        if (ac.visao) acLista.push('Problemas de visão');
+        if (ac.neurologico) acLista.push('Perturbação neurológica');
+        if (ac.genetico) acLista.push('Perturbação genética/síndrome');
+        if (ac.phda) acLista.push('PHDA');
+        if (ac.pea) acLista.push('PEA');
+        if (ac.outro && ac.outroDesc) acLista.push(ac.outroDesc);
+        
+        // Acompanhamentos activos
+        const acompLista = [];
+        if (acomp.tf) acompLista.push(`Terapia da Fala${acomp.tfDesde ? ' (desde ' + acomp.tfDesde + ')' : ''}`);
+        if (acomp.psic) acompLista.push(`Psicologia${acomp.psicDesde ? ' (desde ' + acomp.psicDesde + ')' : ''}`);
+        if (acomp.to) acompLista.push(`Terapia Ocupacional${acomp.toDesde ? ' (desde ' + acomp.toDesde + ')' : ''}`);
+        if (acomp.fisio) acompLista.push(`Fisioterapia${acomp.fisioDesde ? ' (desde ' + acomp.fisioDesde + ')' : ''}`);
+        if (acomp.pedopsiq) acompLista.push(`Pedopsiquiatria${acomp.pedopsiqDesde ? ' (desde ' + acomp.pedopsiqDesde + ')' : ''}`);
+        if (acomp.neuroped) acompLista.push(`Neuropediatria${acomp.neuropedDesde ? ' (desde ' + acomp.neuropedDesde + ')' : ''}`);
+        if (acomp.apoio) acompLista.push(`Apoio educativo${acomp.apoioDesde ? ' (desde ' + acomp.apoioDesde + ')' : ''}`);
+        
+        // Antecedentes familiares activos
+        const afLista = [];
+        if (af.linguagem) afLista.push('Dificuldades de linguagem');
+        if (af.leitura) afLista.push('Dificuldades de leitura');
+        if (af.escrita) afLista.push('Dificuldades de escrita');
+        if (af.aprendizagem) afLista.push('Dificuldades de aprendizagem');
+        
+        infoCrianca = `
+            <div class="section-crianca">
+                <h2>Informação Clínica</h2>
+                <div class="info-clinica-grid">
+                    <div class="info-clinica-col">
+                        <h4>Dados de Desenvolvimento</h4>
+                        <table class="info-mini-table">
+                            ${criancaActual.idade_primeiras_palavras ? `<tr><td>Primeiras palavras:</td><td>${criancaActual.idade_primeiras_palavras}</td></tr>` : ''}
+                            ${criancaActual.idade_primeiras_frases ? `<tr><td>Primeiras frases:</td><td>${criancaActual.idade_primeiras_frases}</td></tr>` : ''}
+                            ${criancaActual.idade_primeiros_passos ? `<tr><td>Primeiros passos:</td><td>${criancaActual.idade_primeiros_passos}</td></tr>` : ''}
+                        </table>
+                        ${criancaActual.preocupacoes_desenvolvimento ? `<p class="preocupacoes"><strong>Preocupações:</strong> ${criancaActual.preocupacoes_desenvolvimento}</p>` : ''}
+                    </div>
+                    <div class="info-clinica-col">
+                        <h4>Antecedentes Clínicos</h4>
+                        ${acLista.length > 0 ? `<ul>${acLista.map(a => `<li>${a}</li>`).join('')}</ul>` : '<p class="sem-dados">Sem antecedentes relevantes</p>'}
+                    </div>
+                    <div class="info-clinica-col">
+                        <h4>Acompanhamentos</h4>
+                        ${acompLista.length > 0 ? `<ul>${acompLista.map(a => `<li>${a}</li>`).join('')}</ul>` : '<p class="sem-dados">Sem acompanhamentos</p>'}
+                    </div>
+                    <div class="info-clinica-col">
+                        <h4>Antecedentes Familiares</h4>
+                        ${afLista.length > 0 ? `<ul>${afLista.map(a => `<li>${a}</li>`).join('')}</ul>${af.quem ? `<p><small>Grau: ${af.quem}</small></p>` : ''}` : '<p class="sem-dados">Sem antecedentes relevantes</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
     // Gerar secção do plano terapêutico se existir
     let planoHtml = '';
     if (planoActual || casoActual.planoTerapeutico) {
         const plano = planoActual || casoActual.planoTerapeutico;
         planoHtml = `
             <div class="section page-break">
-                <h2>🤖 Plano Terapêutico (Sugerido por IA)</h2>
+                <h2>Plano Terapêutico</h2>
                 <div class="plano-content">
-                    ${plano.resumo ? `<p><strong>Resumo:</strong> ${plano.resumo}</p>` : ''}
-                    ${plano.objectivo_geral ? `<p><strong>Objectivo Geral:</strong> ${plano.objectivo_geral}</p>` : ''}
+                    ${plano.resumo ? `<p class="plano-resumo">${plano.resumo}</p>` : ''}
+                    ${plano.objectivo_geral ? `<div class="plano-obj-geral"><strong>Objectivo Geral:</strong> ${plano.objectivo_geral}</div>` : ''}
                     ${plano.objectivos_especificos?.length ? `
-                        <h3>Objectivos Específicos</h3>
+                        <h4>Objectivos Específicos</h4>
                         <ul>${plano.objectivos_especificos.map(o => `<li>${o}</li>`).join('')}</ul>
                     ` : ''}
                     ${plano.estrategias?.length ? `
-                        <h3>Estratégias de Intervenção</h3>
+                        <h4>Estratégias de Intervenção</h4>
                         <ul>${plano.estrategias.map(e => `<li>${e}</li>`).join('')}</ul>
                     ` : ''}
                     ${plano.actividades_sugeridas?.length ? `
-                        <h3>Actividades Sugeridas</h3>
+                        <h4>Actividades Sugeridas</h4>
                         <ul>${plano.actividades_sugeridas.map(a => `<li>${a}</li>`).join('')}</ul>
                     ` : ''}
-                    ${plano.materiais_recomendados?.length ? `
-                        <h3>Materiais Recomendados</h3>
-                        <ul>${plano.materiais_recomendados.map(m => `<li>${m}</li>`).join('')}</ul>
-                    ` : ''}
-                    ${plano.frequencia_sugerida ? `<p><strong>Frequência:</strong> ${plano.frequencia_sugerida}</p>` : ''}
-                    ${plano.duracao_estimada ? `<p><strong>Duração Estimada:</strong> ${plano.duracao_estimada}</p>` : ''}
-                    ${plano.indicadores_progresso?.length ? `
-                        <h3>Indicadores de Progresso</h3>
-                        <ul>${plano.indicadores_progresso.map(i => `<li>${i}</li>`).join('')}</ul>
+                    ${plano.frequencia_sugerida || plano.duracao_estimada ? `
+                        <div class="plano-freq">
+                            ${plano.frequencia_sugerida ? `<span><strong>Frequência:</strong> ${plano.frequencia_sugerida}</span>` : ''}
+                            ${plano.duracao_estimada ? `<span><strong>Duração Estimada:</strong> ${plano.duracao_estimada}</span>` : ''}
+                        </div>
                     ` : ''}
                     ${plano.recomendacoes_familia?.length ? `
-                        <h3>Recomendações para a Família</h3>
+                        <h4>Recomendações para a Família</h4>
                         <ul>${plano.recomendacoes_familia.map(r => `<li>${r}</li>`).join('')}</ul>
                     ` : ''}
                 </div>
-                <p class="ia-disclaimer"><em>Este plano foi gerado por IA e deve ser validado por um profissional de saúde.</em></p>
+                <p class="ia-disclaimer">Este plano foi gerado por IA e deve ser validado pelo terapeuta responsável.</p>
             </div>
         `;
     }
@@ -1491,17 +1552,15 @@ function gerarRelatorio() {
                             <th>Valor</th>
                             <th>Escala</th>
                             <th>Competência</th>
-                            <th>Data</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${casoActual.provasAplicadas.map(p => `
                             <tr>
-                                <td>${p.nome}</td>
-                                <td>${p.valor}</td>
-                                <td>${p.escala.toUpperCase()}</td>
-                                <td><strong>${p.competencia}/10</strong></td>
-                                <td>${p.data ? new Date(p.data).toLocaleDateString('pt-PT') : '-'}</td>
+                                <td>${p.prova || p.nome || '-'}</td>
+                                <td>${p.valor || '-'}</td>
+                                <td>${(p.esc || p.escala || '').toUpperCase()}</td>
+                                <td class="comp-cell"><strong>${p.comp || p.competencia || '-'}</strong>/10</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -1512,94 +1571,453 @@ function gerarRelatorio() {
     
     // Notas clínicas
     let notasHtml = '';
-    if (casoActual.notas) {
+    if (casoActual.notas || (criancaActual && criancaActual.notas)) {
+        const notas = casoActual.notas || criancaActual.notas;
         notasHtml = `
             <div class="section">
                 <h2>Notas Clínicas</h2>
-                <div class="notas-box">${casoActual.notas.replace(/\n/g, '<br>')}</div>
+                <div class="notas-box">${notas.replace(/\n/g, '<br>')}</div>
             </div>
         `;
     }
+    
+    // Nome e código
+    const nomeCaso = criancaActual ? criancaActual.nome : (casoActual.nome || 'Sem nome');
+    const codigoCaso = criancaActual ? criancaActual.codigo : (casoActual.codigo || casoActual.id || '-');
+    const diagnostico = criancaActual ? criancaActual.diagnostico : '';
     
     const html = `<!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório - ${casoActual.nome || casoActual.id}</title>
+    <title>Relatório PERLIM - ${nomeCaso}</title>
     <style>
-        @page { size: A4; margin: 20mm; }
+        @page { 
+            size: A4; 
+            margin: 15mm 15mm 20mm 15mm;
+        }
+        @media print {
+            body { padding: 0; }
+            .page-break { page-break-before: always; }
+        }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; padding: 40px; color: #1E293B; line-height: 1.6; font-size: 12px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #00A79D; padding-bottom: 20px; margin-bottom: 30px; }
-        .logo-section { display: flex; align-items: center; gap: 15px; }
-        .logo-section img { height: 50px; }
-        .header h1 { font-size: 20px; color: #00A79D; margin-bottom: 4px; }
-        .header-subtitle { font-size: 11px; color: #64748B; }
-        .header-right { text-align: right; }
-        .header-right p { font-size: 11px; color: #64748B; }
-        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
-        .info-item { padding: 12px 15px; background: #F1F5F9; border-radius: 8px; }
-        .info-item label { font-size: 10px; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
-        .info-item p { font-size: 14px; font-weight: 600; margin-top: 4px; }
-        .radar-container { text-align: center; margin: 30px 0; }
-        .radar-container img { max-width: 450px; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px; }
-        .section { margin: 25px 0; }
-        .section h2 { font-size: 14px; color: #00A79D; border-bottom: 2px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 15px; }
-        .section h3 { font-size: 12px; color: #334155; margin: 15px 0 8px; }
-        .analysis-item { padding: 10px 15px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; }
-        .critical { background: #FEE2E2; border-left: 4px solid #EF4444; }
-        .warning { background: #FEF3C7; border-left: 4px solid #F59E0B; }
-        .success { background: #D1FAE5; border-left: 4px solid #10B981; }
-        .provas-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        .provas-table th, .provas-table td { padding: 8px 12px; border: 1px solid #E2E8F0; text-align: left; }
-        .provas-table th { background: #F1F5F9; font-weight: 600; }
-        .notas-box { background: #F8FAFC; padding: 15px; border-radius: 8px; border: 1px solid #E2E8F0; }
-        .plano-content { background: #F0FDF9; padding: 20px; border-radius: 8px; border: 1px solid #99F6E4; }
-        .plano-content ul { margin: 8px 0 15px 20px; }
-        .plano-content li { margin-bottom: 4px; }
-        .ia-disclaimer { font-size: 10px; color: #64748B; margin-top: 15px; text-align: center; }
-        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #E2E8F0; text-align: center; font-size: 10px; color: #64748B; }
-        .page-break { page-break-before: always; }
-        @media print { body { padding: 0; } }
+        
+        body { 
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            padding: 30px 40px; 
+            color: #333; 
+            line-height: 1.5; 
+            font-size: 11pt;
+            background: white;
+        }
+        
+        /* HEADER CAIDI */
+        .header-caidi {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #00A79D;
+            margin-bottom: 25px;
+        }
+        
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-logo img {
+            height: 45px;
+        }
+        
+        .header-logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #5a5a5a;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-logo-text .icon {
+            color: #00A79D;
+        }
+        
+        .header-right {
+            text-align: right;
+            color: #5a5a5a;
+            font-size: 11pt;
+        }
+        
+        .header-right strong {
+            color: #333;
+        }
+        
+        /* TÍTULO DO RELATÓRIO */
+        .report-title {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .report-title h1 {
+            font-size: 18pt;
+            color: #00A79D;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .report-title .subtitle {
+            font-size: 10pt;
+            color: #666;
+        }
+        
+        /* DADOS DA CRIANÇA */
+        .dados-crianca {
+            background: linear-gradient(135deg, #f8fffe 0%, #e8f7f5 100%);
+            border: 1px solid #b8e6e0;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+        }
+        
+        .dados-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .dado-item label {
+            font-size: 8pt;
+            color: #00A79D;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .dado-item p {
+            font-size: 12pt;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .dado-item.destaque p {
+            font-size: 14pt;
+            color: #00A79D;
+        }
+        
+        /* RADAR */
+        .radar-container {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 10px;
+        }
+        
+        .radar-container img {
+            max-width: 420px;
+            width: 100%;
+        }
+        
+        .radar-legenda {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .legenda-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legenda-cor {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        
+        .legenda-cor.vermelho { background: #FFCDD2; border: 1px solid #EF5350; }
+        .legenda-cor.amarelo { background: #FFF9C4; border: 1px solid #FFEB3B; }
+        .legenda-cor.branco { background: #fff; border: 1px solid #ddd; }
+        
+        /* SECÇÕES */
+        .section {
+            margin: 25px 0;
+        }
+        
+        .section h2 {
+            font-size: 12pt;
+            color: #00A79D;
+            font-weight: 700;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 15px;
+        }
+        
+        .section h4 {
+            font-size: 10pt;
+            color: #333;
+            margin: 15px 0 8px;
+            font-weight: 600;
+        }
+        
+        /* INFO CLÍNICA */
+        .section-crianca h2 {
+            margin-bottom: 15px;
+        }
+        
+        .info-clinica-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .info-clinica-col {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .info-clinica-col h4 {
+            font-size: 9pt;
+            color: #00A79D;
+            text-transform: uppercase;
+            margin: 0 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-clinica-col ul {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 10pt;
+        }
+        
+        .info-clinica-col li {
+            margin-bottom: 4px;
+        }
+        
+        .info-mini-table {
+            width: 100%;
+            font-size: 10pt;
+        }
+        
+        .info-mini-table td {
+            padding: 3px 0;
+        }
+        
+        .info-mini-table td:first-child {
+            color: #666;
+            width: 55%;
+        }
+        
+        .sem-dados {
+            color: #999;
+            font-style: italic;
+            font-size: 10pt;
+        }
+        
+        .preocupacoes {
+            margin-top: 10px;
+            font-size: 10pt;
+            padding: 8px;
+            background: #fff3e0;
+            border-radius: 5px;
+        }
+        
+        /* ANÁLISE */
+        .analysis-item {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 10pt;
+        }
+        
+        .critical { background: #FFEBEE; border-left: 4px solid #E53935; }
+        .warning { background: #FFF8E1; border-left: 4px solid #FFB300; }
+        .success { background: #E8F5E9; border-left: 4px solid #43A047; }
+        
+        /* TABELAS */
+        .provas-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+        
+        .provas-table th, .provas-table td {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+        
+        .provas-table th {
+            background: #00A79D;
+            color: white;
+            font-weight: 600;
+            font-size: 9pt;
+            text-transform: uppercase;
+        }
+        
+        .provas-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .comp-cell {
+            text-align: center;
+            color: #00A79D;
+        }
+        
+        /* NOTAS */
+        .notas-box {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #00A79D;
+            font-size: 10pt;
+            line-height: 1.6;
+        }
+        
+        /* PLANO */
+        .plano-content {
+            background: linear-gradient(135deg, #f0fdf9 0%, #e0f7f3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #a7e8dc;
+        }
+        
+        .plano-resumo {
+            font-size: 11pt;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .plano-obj-geral {
+            font-size: 11pt;
+            padding: 10px 15px;
+            background: #00A79D;
+            color: white;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .plano-content ul {
+            margin: 8px 0 15px 20px;
+        }
+        
+        .plano-content li {
+            margin-bottom: 5px;
+        }
+        
+        .plano-freq {
+            display: flex;
+            gap: 30px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+        
+        .ia-disclaimer {
+            font-size: 9pt;
+            color: #666;
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        /* FOOTER */
+        .footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8pt;
+            color: #888;
+        }
+        
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer-left img {
+            height: 25px;
+            opacity: 0.6;
+        }
+        
+        .footer-center {
+            text-align: center;
+        }
+        
+        .footer-right {
+            text-align: right;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo-section">
-            <img src="logo.png" alt="CAIDI" onerror="this.style.display='none'">
-            <div>
-                <h1>Perfil de Competência Linguística</h1>
-                <p class="header-subtitle">Quadrantes de Alves (2019) · Operacionalização: J. Miguel</p>
-            </div>
+    <!-- HEADER CAIDI -->
+    <div class="header-caidi">
+        <div class="header-logo">
+            <span class="header-logo-text"><span class="icon">C</span>AIDI</span>
         </div>
         <div class="header-right">
-            <p><strong>Data do Relatório:</strong> ${new Date().toLocaleDateString('pt-PT')}</p>
-            <p>CAIDI - Centro de Avaliação</p>
+            Centro de Apoio e Intervenção<br>
+            <strong>no Desenvolvimento Infantil</strong>
         </div>
     </div>
     
-    <div class="info-grid">
-        <div class="info-item">
-            <label>Código</label>
-            <p>${casoActual.id || '-'}</p>
-        </div>
-        <div class="info-item">
-            <label>Nome</label>
-            <p>${casoActual.nome || '-'}</p>
-        </div>
-        <div class="info-item">
-            <label>Idade</label>
-            <p>${casoActual.idade || '-'}</p>
-        </div>
-        <div class="info-item">
-            <label>Data da Avaliação</label>
-            <p>${casoActual.data || '-'}</p>
-        </div>
+    <!-- TÍTULO -->
+    <div class="report-title">
+        <h1>PERLIM — Perfil Linguístico Multidimensional</h1>
+        <p class="subtitle">Relatório de Avaliação Linguística</p>
     </div>
     
+    <!-- DADOS DA CRIANÇA -->
+    <div class="dados-crianca">
+        <div class="dados-grid">
+            <div class="dado-item destaque">
+                <label>Código</label>
+                <p>${codigoCaso}</p>
+            </div>
+            <div class="dado-item">
+                <label>Nome</label>
+                <p>${nomeCaso}</p>
+            </div>
+            <div class="dado-item">
+                <label>Idade</label>
+                <p>${casoActual.idade || '-'}</p>
+            </div>
+            <div class="dado-item">
+                <label>Data da Avaliação</label>
+                <p>${casoActual.data ? new Date(casoActual.data).toLocaleDateString('pt-PT') : '-'}</p>
+            </div>
+        </div>
+        ${diagnostico ? `<p style="margin-top:12px;font-size:10pt"><strong>Diagnóstico/Hipótese:</strong> ${diagnostico}</p>` : ''}
+    </div>
+    
+    <!-- RADAR -->
     <div class="radar-container">
-        <img src="${radarChart.toDataURL()}" alt="Perfil Linguístico">
+        <img src="${radarChart.toDataURL()}" alt="Perfil Linguístico Multidimensional">
+        <div class="radar-legenda">
+            <div class="legenda-item"><span class="legenda-cor vermelho"></span> 0-3: Dificuldade Acentuada</div>
+            <div class="legenda-item"><span class="legenda-cor amarelo"></span> 3-5: Dificuldade Moderada</div>
+            <div class="legenda-item"><span class="legenda-cor branco"></span> 5-10: Desempenho Típico</div>
+        </div>
     </div>
+    
+    ${infoCrianca}
     
     ${provasHtml}
     
@@ -1622,12 +2040,26 @@ function gerarRelatorio() {
     
     ${planoHtml}
     
+    <!-- FOOTER -->
     <div class="footer">
-        <p>© ${new Date().getFullYear()} CAIDI - Centro de Avaliação e Intervenção em Dificuldades Intelectuais</p>
-        <p>Este relatório foi gerado automaticamente pelo sistema Perfil de Competência Linguística</p>
+        <div class="footer-left">
+            <span>CAIDI</span>
+        </div>
+        <div class="footer-center">
+            <p>PERLIM — Perfil Linguístico Multidimensional</p>
+            <p>Modelo: Alves (2019) · Operacionalização: J. Miguel</p>
+        </div>
+        <div class="footer-right">
+            <p>Gerado em ${new Date().toLocaleDateString('pt-PT')}</p>
+            <p>© ${new Date().getFullYear()} Joana Miguel</p>
+        </div>
     </div>
     
-    <script>window.onload = function() { window.print(); }</script>
+    <script>
+        window.onload = function() { 
+            setTimeout(() => window.print(), 500);
+        }
+    </script>
 </body>
 </html>`;
     
@@ -2467,3 +2899,371 @@ window.abrirEdicaoProva = abrirEdicaoProva;
 window.removerProvaAplicada = removerProvaAplicada;
 window.abrirEdicaoProvaCustom = abrirEdicaoProvaCustom;
 window.carregarCasoCloud = carregarCasoCloud;
+
+// ============================================================================
+// GESTÃO DE CRIANÇAS
+// ============================================================================
+
+let criancaActual = null;
+
+// Toggle de secções colapsáveis
+function toggleSection(header) {
+    const fieldset = header.closest('fieldset');
+    fieldset.classList.toggle('collapsed');
+}
+window.toggleSection = toggleSection;
+
+// Toggle de subfields em checkboxes
+function toggleSubfield(checkbox, subfieldId) {
+    const subfield = document.getElementById(subfieldId);
+    if (subfield) {
+        subfield.disabled = !checkbox.checked;
+        if (!checkbox.checked) subfield.value = '';
+    }
+}
+window.toggleSubfield = toggleSubfield;
+
+// Calcular idade em anos;meses
+function calcularIdade(dataNascimento, dataReferencia = null) {
+    const dn = new Date(dataNascimento);
+    const ref = dataReferencia ? new Date(dataReferencia) : new Date();
+    
+    let anos = ref.getFullYear() - dn.getFullYear();
+    let meses = ref.getMonth() - dn.getMonth();
+    
+    if (meses < 0) {
+        anos--;
+        meses += 12;
+    }
+    
+    if (ref.getDate() < dn.getDate()) {
+        meses--;
+        if (meses < 0) {
+            anos--;
+            meses += 12;
+        }
+    }
+    
+    return `${anos};${meses}`;
+}
+window.calcularIdade = calcularIdade;
+
+// Abrir modal de seleccionar/criar criança
+async function abrirSeleccionarCrianca() {
+    abrirModal('modal-seleccionar-crianca');
+    await actualizarListaCriancas();
+}
+window.abrirSeleccionarCrianca = abrirSeleccionarCrianca;
+
+// Actualizar lista de crianças
+async function actualizarListaCriancas() {
+    const container = document.getElementById('lista-criancas');
+    container.innerHTML = '<p class="text-muted">A carregar...</p>';
+    
+    try {
+        const criancas = await API.listarCriancas();
+        
+        if (criancas.length === 0) {
+            container.innerHTML = '<p class="text-muted">Nenhuma criança registada. Clique em "Nova Criança" para adicionar.</p>';
+            return;
+        }
+        
+        container.innerHTML = criancas.map(c => {
+            const idade = c.data_nascimento ? calcularIdade(c.data_nascimento) : '-';
+            return `
+                <div class="crianca-item" onclick="seleccionarCrianca(${c.id})">
+                    <div class="crianca-item-info">
+                        <h4><span class="codigo">${c.codigo}</span> — ${c.nome || 'Sem nome'}</h4>
+                        <p>Idade: ${idade} | ${c.diagnostico || 'Sem diagnóstico'}</p>
+                    </div>
+                    <div class="crianca-item-actions">
+                        <button class="btn-mini" onclick="event.stopPropagation(); editarCrianca(${c.id})" title="Editar">✏️</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Erro ao carregar crianças:', error);
+        container.innerHTML = '<p class="text-muted">Erro ao carregar crianças.</p>';
+    }
+}
+
+// Pesquisar crianças
+function filtrarCriancas(e) {
+    const termo = e.target.value.toLowerCase();
+    document.querySelectorAll('.crianca-item').forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(termo) ? 'flex' : 'none';
+    });
+}
+
+// Abrir modal de nova criança
+function abrirNovaCrianca() {
+    fecharModal('modal-seleccionar-crianca');
+    limparFormularioCrianca();
+    document.getElementById('crianca-codigo').textContent = 'Será gerado automaticamente';
+    document.getElementById('crianca-id').value = '';
+    abrirModal('modal-crianca');
+}
+window.abrirNovaCrianca = abrirNovaCrianca;
+
+// Editar criança existente
+async function editarCrianca(id) {
+    try {
+        const crianca = await API.obterCrianca(id);
+        if (!crianca) {
+            mostrarToast('Criança não encontrada', 'error');
+            return;
+        }
+        
+        fecharModal('modal-seleccionar-crianca');
+        preencherFormularioCrianca(crianca);
+        abrirModal('modal-crianca');
+    } catch (error) {
+        mostrarToast('Erro ao carregar criança', 'error');
+    }
+}
+window.editarCrianca = editarCrianca;
+
+// Preencher formulário com dados da criança
+function preencherFormularioCrianca(c) {
+    document.getElementById('crianca-id').value = c.id;
+    document.getElementById('crianca-codigo').textContent = c.codigo || '-';
+    document.getElementById('crianca-nome').value = c.nome || '';
+    document.getElementById('crianca-dn').value = c.data_nascimento || '';
+    document.getElementById('crianca-sexo').value = c.sexo || '';
+    document.getElementById('crianca-lateralidade').value = c.lateralidade || '';
+    document.getElementById('crianca-escola').value = c.escola || '';
+    document.getElementById('crianca-ano').value = c.ano_escolar || '';
+    document.getElementById('crianca-linguas').value = c.linguas_casa || '';
+    document.getElementById('crianca-palavras').value = c.idade_primeiras_palavras || '';
+    document.getElementById('crianca-frases').value = c.idade_primeiras_frases || '';
+    document.getElementById('crianca-passos').value = c.idade_primeiros_passos || '';
+    document.getElementById('crianca-preocupacoes').value = c.preocupacoes_desenvolvimento || '';
+    document.getElementById('crianca-diagnostico').value = c.diagnostico || '';
+    document.getElementById('crianca-notas').value = c.notas || '';
+    
+    // Antecedentes clínicos
+    const ac = c.antecedentes_clinicos || {};
+    document.getElementById('ac-prematuridade').checked = ac.prematuridade || false;
+    document.getElementById('ac-prematuridade-sem').value = ac.prematuridadeSemanas || '';
+    document.getElementById('ac-prematuridade-sem').disabled = !ac.prematuridade;
+    document.getElementById('ac-audicao').checked = ac.audicao || false;
+    document.getElementById('ac-visao').checked = ac.visao || false;
+    document.getElementById('ac-neurologico').checked = ac.neurologico || false;
+    document.getElementById('ac-genetico').checked = ac.genetico || false;
+    document.getElementById('ac-phda').checked = ac.phda || false;
+    document.getElementById('ac-pea').checked = ac.pea || false;
+    document.getElementById('ac-outro').checked = ac.outro || false;
+    document.getElementById('ac-outro-desc').value = ac.outroDesc || '';
+    document.getElementById('ac-outro-desc').disabled = !ac.outro;
+    
+    // Acompanhamentos
+    const acomp = c.acompanhamentos || {};
+    ['tf', 'psic', 'to', 'fisio', 'pedopsiq', 'neuroped', 'apoio', 'outro'].forEach(tipo => {
+        const checkbox = document.getElementById(`acomp-${tipo}`);
+        const desde = document.getElementById(`acomp-${tipo}-desde`) || document.getElementById(`acomp-${tipo}-desc`);
+        if (checkbox) {
+            checkbox.checked = acomp[tipo] || false;
+            if (desde) {
+                desde.value = acomp[`${tipo}Desde`] || acomp[`${tipo}Desc`] || '';
+                desde.disabled = !acomp[tipo];
+            }
+        }
+    });
+    
+    // Antecedentes familiares
+    const af = c.antecedentes_familiares || {};
+    document.getElementById('af-linguagem').checked = af.linguagem || false;
+    document.getElementById('af-leitura').checked = af.leitura || false;
+    document.getElementById('af-escrita').checked = af.escrita || false;
+    document.getElementById('af-aprendizagem').checked = af.aprendizagem || false;
+    document.getElementById('af-quem').value = af.quem || '';
+}
+
+// Limpar formulário
+function limparFormularioCrianca() {
+    document.getElementById('form-crianca').reset();
+    document.querySelectorAll('#form-crianca .subfield').forEach(f => f.disabled = true);
+}
+
+// Recolher dados do formulário
+function recolherDadosCrianca() {
+    return {
+        nome: document.getElementById('crianca-nome').value.trim(),
+        dataNascimento: document.getElementById('crianca-dn').value,
+        sexo: document.getElementById('crianca-sexo').value,
+        lateralidade: document.getElementById('crianca-lateralidade').value,
+        escola: document.getElementById('crianca-escola').value.trim(),
+        anoEscolar: document.getElementById('crianca-ano').value,
+        linguas: document.getElementById('crianca-linguas').value.trim(),
+        primeirasPalavras: document.getElementById('crianca-palavras').value.trim(),
+        primeirasFrases: document.getElementById('crianca-frases').value.trim(),
+        primeirosPassos: document.getElementById('crianca-passos').value.trim(),
+        preocupacoes: document.getElementById('crianca-preocupacoes').value.trim(),
+        diagnostico: document.getElementById('crianca-diagnostico').value.trim(),
+        notas: document.getElementById('crianca-notas').value.trim(),
+        antecedentesClinicos: {
+            prematuridade: document.getElementById('ac-prematuridade').checked,
+            prematuridadeSemanas: document.getElementById('ac-prematuridade-sem').value,
+            audicao: document.getElementById('ac-audicao').checked,
+            visao: document.getElementById('ac-visao').checked,
+            neurologico: document.getElementById('ac-neurologico').checked,
+            genetico: document.getElementById('ac-genetico').checked,
+            phda: document.getElementById('ac-phda').checked,
+            pea: document.getElementById('ac-pea').checked,
+            outro: document.getElementById('ac-outro').checked,
+            outroDesc: document.getElementById('ac-outro-desc').value
+        },
+        acompanhamentos: {
+            tf: document.getElementById('acomp-tf').checked,
+            tfDesde: document.getElementById('acomp-tf-desde').value,
+            psic: document.getElementById('acomp-psic').checked,
+            psicDesde: document.getElementById('acomp-psic-desde').value,
+            to: document.getElementById('acomp-to').checked,
+            toDesde: document.getElementById('acomp-to-desde').value,
+            fisio: document.getElementById('acomp-fisio').checked,
+            fisioDesde: document.getElementById('acomp-fisio-desde').value,
+            pedopsiq: document.getElementById('acomp-pedopsiq').checked,
+            pedopsiqDesde: document.getElementById('acomp-pedopsiq-desde').value,
+            neuroped: document.getElementById('acomp-neuroped').checked,
+            neuropedDesde: document.getElementById('acomp-neuroped-desde').value,
+            apoio: document.getElementById('acomp-apoio').checked,
+            apoioDesde: document.getElementById('acomp-apoio-desde').value,
+            outro: document.getElementById('acomp-outro').checked,
+            outroDesc: document.getElementById('acomp-outro-desc').value
+        },
+        antecedentesFamiliares: {
+            linguagem: document.getElementById('af-linguagem').checked,
+            leitura: document.getElementById('af-leitura').checked,
+            escrita: document.getElementById('af-escrita').checked,
+            aprendizagem: document.getElementById('af-aprendizagem').checked,
+            quem: document.getElementById('af-quem').value
+        }
+    };
+}
+
+// Guardar criança
+async function guardarCrianca() {
+    const id = document.getElementById('crianca-id').value;
+    const dados = recolherDadosCrianca();
+    
+    if (!dados.nome) {
+        mostrarToast('O nome é obrigatório', 'warning');
+        return;
+    }
+    
+    try {
+        let crianca;
+        if (id) {
+            crianca = await API.actualizarCrianca(id, dados);
+            mostrarToast('Criança actualizada!', 'success');
+        } else {
+            crianca = await API.guardarCrianca(dados);
+            mostrarToast(`Criança ${crianca.codigo} criada!`, 'success');
+        }
+        
+        fecharModal('modal-crianca');
+        seleccionarCrianca(crianca.id);
+    } catch (error) {
+        console.error('Erro ao guardar criança:', error);
+        mostrarToast('Erro ao guardar: ' + error.message, 'error');
+    }
+}
+window.guardarCrianca = guardarCrianca;
+
+// Seleccionar criança para avaliação
+async function seleccionarCrianca(id) {
+    try {
+        const crianca = await API.obterCrianca(id);
+        if (!crianca) {
+            mostrarToast('Criança não encontrada', 'error');
+            return;
+        }
+        
+        criancaActual = crianca;
+        
+        // Mostrar indicador de criança seleccionada
+        mostrarCriancaSeleccionada(crianca);
+        
+        // Preencher dados na identificação do caso
+        document.getElementById('caso-nome').value = crianca.nome || '';
+        if (crianca.data_nascimento) {
+            document.getElementById('caso-idade').value = calcularIdade(crianca.data_nascimento);
+        }
+        if (crianca.ano_escolar) {
+            // Mapear para valores do select
+            const mapa = {
+                'JI 3 anos': 'pre', 'JI 4 anos': 'pre', 'JI 5 anos': 'pre',
+                '1º ano': '1', '2º ano': '2', '3º ano': '3', '4º ano': '4',
+                '5º ano': '4', '6º ano': '4'
+            };
+            document.getElementById('caso-esc').value = mapa[crianca.ano_escolar] || '';
+        }
+        
+        fecharModal('modal-seleccionar-crianca');
+        mostrarToast(`${crianca.codigo} seleccionada`, 'success');
+    } catch (error) {
+        mostrarToast('Erro ao seleccionar criança', 'error');
+    }
+}
+window.seleccionarCrianca = seleccionarCrianca;
+
+// Mostrar indicador de criança seleccionada
+function mostrarCriancaSeleccionada(crianca) {
+    // Remover indicador existente
+    const existente = document.querySelector('.crianca-seleccionada');
+    if (existente) existente.remove();
+    
+    // Criar novo indicador
+    const indicador = document.createElement('div');
+    indicador.className = 'crianca-seleccionada';
+    const idade = crianca.data_nascimento ? calcularIdade(crianca.data_nascimento) : '-';
+    indicador.innerHTML = `
+        <div class="crianca-seleccionada-info">
+            <span class="codigo">${crianca.codigo}</span>
+            <span class="nome">${crianca.nome}</span>
+            <span class="idade">(${idade})</span>
+        </div>
+        <button class="btn btn-secondary btn-mudar-crianca" onclick="abrirSeleccionarCrianca()">Mudar</button>
+    `;
+    
+    // Inserir antes do card de identificação
+    const cardIdent = document.getElementById('card-identificacao');
+    cardIdent.parentNode.insertBefore(indicador, cardIdent);
+}
+
+// Actualizar idade quando muda data da avaliação
+function actualizarIdadeAvaliacao() {
+    if (criancaActual && criancaActual.data_nascimento) {
+        const dataAval = document.getElementById('caso-data').value;
+        if (dataAval) {
+            document.getElementById('caso-idade').value = calcularIdade(criancaActual.data_nascimento, dataAval);
+        }
+    }
+}
+
+// Event Listeners para crianças
+document.addEventListener('DOMContentLoaded', () => {
+    // Botão nova criança
+    const btnNova = document.getElementById('btn-nova-crianca');
+    if (btnNova) btnNova.addEventListener('click', abrirNovaCrianca);
+    
+    // Botão guardar criança
+    const btnGuardar = document.getElementById('btn-guardar-crianca');
+    if (btnGuardar) btnGuardar.addEventListener('click', guardarCrianca);
+    
+    // Pesquisa de crianças
+    const searchCrianca = document.getElementById('crianca-search');
+    if (searchCrianca) searchCrianca.addEventListener('input', filtrarCriancas);
+    
+    // Botão load-case abre selecção de criança
+    const btnLoadCase = document.getElementById('btn-load-case');
+    if (btnLoadCase) {
+        btnLoadCase.removeEventListener('click', () => {});
+        btnLoadCase.addEventListener('click', abrirSeleccionarCrianca);
+    }
+    
+    // Actualizar idade quando muda data da avaliação
+    const dataAval = document.getElementById('caso-data');
+    if (dataAval) dataAval.addEventListener('change', actualizarIdadeAvaliacao);
+});
