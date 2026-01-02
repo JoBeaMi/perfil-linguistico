@@ -1,0 +1,23 @@
+{
+  "name": "Perfil de Competência Linguística",
+  "short_name": "PCL",
+  "description": "Ferramenta profissional de visualização multidimensional para avaliação linguística baseada nos Quadrantes de Alves (2019)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFB",
+  "theme_color": "#00A79D",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "medical", "productivity"],
+  "lang": "pt-PT",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}
