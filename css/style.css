@@ -2841,3 +2841,327 @@ body.fullscreen .radar-header::after {
 .app-content {
     display: block;
 }
+
+/* =============================================
+   MODAL CRIANÇA - FORMULÁRIO
+   ============================================= */
+
+.crianca-codigo {
+    background: linear-gradient(135deg, #e8f5f3 0%, #d4f0ec 100%);
+    border: 2px solid var(--caidi-turquesa);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.codigo-label {
+    font-weight: 600;
+    color: #666;
+}
+
+.codigo-valor {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--caidi-turquesa);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+}
+
+.form-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    background: #fafafa;
+}
+
+.form-section legend {
+    font-weight: 700;
+    color: var(--caidi-turquesa);
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+}
+
+.form-section.collapsible {
+    padding: 0;
+    background: white;
+}
+
+.collapsible-header {
+    cursor: pointer;
+    padding: 1rem 1.25rem;
+    background: #f5f5f5;
+    border-radius: 12px;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    background: #ebebeb;
+}
+
+.collapsible-content {
+    padding: 1.25rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.collapsible.collapsed .collapsible-content {
+    display: none;
+}
+
+.collapsible.collapsed .collapsible-header span::before {
+    content: '▶ ';
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Checkbox Grid */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-wrap: wrap;
+}
+
+.checkbox-item:hover {
+    border-color: var(--caidi-turquesa);
+    background: #f8fffe;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--caidi-turquesa);
+    cursor: pointer;
+}
+
+.checkbox-item span {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.checkbox-item .subfield {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.checkbox-item .subfield:disabled {
+    background: #f5f5f5;
+    opacity: 0.6;
+}
+
+/* Lista de Crianças */
+.crianca-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.crianca-actions .search-input {
+    flex: 1;
+}
+
+.lista-criancas {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.crianca-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.crianca-item:hover {
+    border-color: var(--caidi-turquesa);
+    background: #f8fffe;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.crianca-item-info {
+    flex: 1;
+}
+
+.crianca-item-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.crianca-item-info h4 .codigo {
+    color: var(--caidi-turquesa);
+    font-family: monospace;
+    font-weight: 800;
+}
+
+.crianca-item-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.crianca-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Botão Guardar Destacado */
+.btn-guardar-destaque {
+    background: linear-gradient(135deg, #00a99d 0%, #007a70 100%);
+    color: white;
+    font-weight: 700;
+    padding: 0.85rem 1.75rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0,169,157,0.35);
+    transition: all 0.25s;
+}
+
+.btn-guardar-destaque:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,169,157,0.45);
+}
+
+.btn-guardar-destaque:active {
+    transform: translateY(0);
+}
+
+/* Melhorar botão Guardar na sidebar */
+#btn-guardar {
+    background: linear-gradient(135deg, #00a99d 0%, #007a70 100%) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+#btn-guardar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,169,157,0.3);
+}
+
+/* Indicador de criança seleccionada */
+.crianca-seleccionada {
+    background: linear-gradient(135deg, #e8f5f3 0%, #d4f0ec 100%);
+    border: 2px solid var(--caidi-turquesa);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.crianca-seleccionada-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.crianca-seleccionada-info .codigo {
+    font-family: monospace;
+    font-weight: 800;
+    color: var(--caidi-turquesa);
+    font-size: 1.1rem;
+}
+
+.crianca-seleccionada-info .nome {
+    font-weight: 600;
+    color: #333;
+}
+
+.crianca-seleccionada-info .idade {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.btn-mudar-crianca {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Dark mode ajustes */
+[data-theme="dark"] .form-section {
+    background: #252525;
+    border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .collapsible-header {
+    background: #2a2a2a;
+}
+
+[data-theme="dark"] .checkbox-item {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .crianca-item {
+    background: #252525;
+    border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .crianca-codigo,
+[data-theme="dark"] .crianca-seleccionada {
+    background: linear-gradient(135deg, #1a3330 0%, #0d2420 100%);
+    border-color: var(--caidi-turquesa);
+}
+
+[data-theme="dark"] .modal-footer {
+    background: #1e1e1e;
+    border-color: #3a3a3a;
+}
