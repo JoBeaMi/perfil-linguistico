@@ -1544,6 +1544,10 @@ function mostrarInfoTab(tab) {
                         ${provas.map(p => `<tr><td><b>${p.nome}</b>${p.custom ? ' <span style="color:var(--caidi-turquesa)">★</span>' : ''}</td><td>${p.escala.toUpperCase()}</td><td>${p.dominio}</td><td>${p.tarefas?.length || 1}</td><td>${p.custom ? `<button class="btn-mini" onclick="eliminarProvaCustom('${p.id}')">×</button>` : ''}</td></tr>`).join('')}
                     </tbody>
                 </table>
+                <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-muted);line-height:1.6;font-style:italic">
+                    Os nomes dos instrumentos são propriedade dos respectivos autores e editoras. 
+                    O mapeamento dos segmentos avaliados constitui uma interpretação clínica para fins de integração do perfil linguístico.
+                </p>
             `;
             break;
         case 'conversao':
