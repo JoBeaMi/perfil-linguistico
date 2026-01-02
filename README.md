@@ -1,72 +1,116 @@
-# 🎯 Perfil de Competência Linguística
+# PERLIM  
+## Perfil Linguístico Multidimensional
 
-**Ferramenta web para visualização multidimensional de perfis linguísticos**
+Ferramenta web para caracterização, leitura e interpretação de perfis linguísticos.
 
-Baseado nos **Quadrantes de Alves (2019)** · Operacionalização: Joana Miguel
+Baseada no modelo conceptual da linguagem oral (Alves, 2019)  
+Conceptualização e operacionalização: Joana Miguel · CAIDI · CLUNL
 
-## 📋 Descrição
+---
 
-Aplicação web que permite criar perfis linguísticos visuais, baseados no modelo de 40 dimensões mensuráveis.
+## Enquadramento
 
-### Estrutura do Perfil
+O **PERLIM** é uma ferramenta profissional que permite **organizar, visualizar e interpretar informação linguística de forma multidimensional**, preservando a complexidade do funcionamento linguístico.
 
-| Dimensão | Categorias |
-| --- | --- |
-| **Módulos** | Fonológico, Morfológico, Sintático, Semântico, Pragmático |
-| **Níveis** | Implícito (automático), Explícito (metalinguístico) |
-| **Circuitos** | Compreensão (input), Expressão (output) |
-| **Modalidades** | Oral, Escrita |
+A ferramenta **apoia a formulação clínica e a tomada de decisão diagnóstica**, permitindo a identificação de padrões de funcionamento, assimetrias e níveis de severidade da dificuldade linguística.  
+Não substitui instrumentos de avaliação estandardizados nem critérios diagnósticos formais, devendo ser utilizada como **ferramenta de integração e interpretação do perfil linguístico**.
 
-**Total: 5 × 2 × 2 × 2 = 40 segmentos**
+---
 
-## ✨ Funcionalidades
+## Modelo conceptual
 
-* 📊 **Radar Chart Interactivo** — Visualização clara do perfil completo
-* 🔄 **Conversão Automática** — Suporta Percentil, QI, Nota Z, Nota T
-* 💾 **Armazenamento na Cloud** — Dados guardados de forma segura (Supabase)
-* 👥 **Contas de Utilizador** — Login para terapeutas/investigadores
-* 📱 **Responsivo** — Funciona em desktop, tablet e mobile
-* 🌙 **Dark Mode** — Tema claro e escuro
-* 📤 **Exportação** — PNG, JSON, CSV, Relatório PDF
+O PERLIM operacionaliza o modelo conceptual da linguagem oral descrito por Alves (2019), no qual a linguagem é entendida como um sistema modular e funcional, organizado por diferentes níveis linguísticos e circuitos de processamento.
 
-## 🚀 Demo
+A estrutura do perfil assenta em quatro eixos fundamentais:
 
-Aceda à aplicação em: **https://jobeami.github.io/perfil-linguistico**
+### Módulos linguísticos  
+Fonológico · Morfológico · Sintático · Semântico · Pragmático
 
-## 📁 Estrutura do Projecto
+### Níveis de funcionamento  
+Implícito (automático) · Explícito (metalinguístico)
 
-```
+### Circuitos de processamento  
+Compreensão (input) · Expressão (output)
+
+### Modalidades  
+Oral · Escrita
+
+A combinação destes eixos resulta em **40 segmentos funcionais**, que permitem uma leitura fina e integrada do perfil linguístico.
+
+---
+
+## Utilização clínica e interpretativa
+
+O PERLIM permite:
+
+- Caracterizar o perfil linguístico global e por domínios específicos  
+- Identificar **assimetrias e dissociações funcionais** entre níveis linguísticos  
+- Apoiar a **hipótese diagnóstica**, em articulação com outros dados clínicos  
+- Contribuir para a **análise da severidade da dificuldade linguística**  
+- Apoiar decisões de intervenção e monitorização do progresso  
+
+---
+
+## Funcionalidades
+
+- Visualização do perfil linguístico através de um gráfico radar interactivo  
+- Conversão automática entre diferentes métricas (Percentil, QI, Nota Z, Nota T)  
+- Armazenamento seguro de dados na cloud (Supabase)  
+- Contas de utilizador para terapeutas e investigadores  
+- Interface responsiva (desktop, tablet e dispositivos móveis)  
+- Modo claro e modo escuro  
+- Exportação de resultados em PNG, JSON, CSV e relatório PDF
+
+---
+
+## Zonas de leitura do perfil
+
+| Zona | Competência | Interpretação funcional |
+| --- | --- | --- |
+| 🔴 Vermelha | 0-3 | Dificuldade acentuada |
+| 🟡 Amarela | 3-5 | Dificuldade moderada/ provável |
+| ⚪ Branca | 5-10 | Desempenho típico |
+
+---
+
+## Demonstração
+
+A aplicação pode ser explorada em:  
+https://jobeami.github.io/perfil-linguistico
+
+---
+
+## Estrutura do projecto
+
+```text
 perfil-linguistico/
-├── index.html              # Página principal
-├── manifest.json           # PWA manifest
-├── logo.png                # Logo CAIDI
-├── logo-branco.png         # Logo para dark mode
+├── index.html
+├── manifest.json
+├── logo.png
+├── logo-branco.png
 ├── css/
-│   └── style.css           # Estilos
+│   └── style.css
 └── js/
-    ├── supabase-client.js  # Integração com Supabase
-    ├── data.js             # Dados e conversões
-    ├── radar.js            # Desenho do radar
-    └── app.js              # Lógica principal
-```
+    ├── supabase-client.js
+    ├── data.js
+    ├── radar.js
+    └── app.js
 
 ## 📊 Zonas de Referência
 
-| Zona | Competência | Interpretação |
-| --- | --- | --- |
-| 🔴 Vermelha | 0-3 | Dificuldade Significativa |
-| 🟡 Amarela | 3-5 | Dificuldade Provável |
-| ⚪ Branca | 5-10 | Desempenho Típico |
+
 
 ## 📚 Referências
 
-* Alves, D.C. (2019). Quadrantes das Manifestações Linguísticas.
+* Alves, D. (2019). Oral language. In The SAGE encyclopedia of human communication sciences and disorders (Vol. 4, pp. 1286–1289). SAGE Publications, Inc.
+https://doi.org/10.4135/9781483380810.n425
+
 * Freitas, M.J., Lousada, M., & Alves, D.C. (Eds.) (2022). *Linguística Clínica*. Language Science Press.
 
 ## 👩‍💻 Autoria
 
 **Conceptualização e operacionalização:** Joana Miguel  
-**Base teórica:** Dina Alves (Quadrantes, 2019)
+**Base teórica:** Dina Caetaneo Alves (2019)
 
 ## 📄 Licença
 
