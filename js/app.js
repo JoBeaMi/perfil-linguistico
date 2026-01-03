@@ -1431,6 +1431,9 @@ function executarExport(tipo) {
         case 'pdf':
             gerarRelatorio();
             break;
+        case 'word':
+            gerarRelatorioWord();
+            break;
     }
 }
 
@@ -2037,6 +2040,508 @@ function gerarRelatorio() {
     win.document.write(html);
     win.document.close();
     mostrarToast('Relatório gerado!', 'success');
+}
+
+// ============================================================================
+// RELATÓRIO WORD - EXPORTAÇÃO NARRATIVA
+// ============================================================================
+
+async function gerarRelatorioWord() {
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, 
+            ImageRun, Header, Footer, AlignmentType, HeadingLevel, BorderStyle, 
+            WidthType, PageNumber, ShadingType, LevelFormat } = docx;
+    
+    // Dados básicos
+    const nomeCaso = criancaActual ? criancaActual.nome : (casoActual.nome || 'Sem nome');
+    const codigoCaso = criancaActual ? criancaActual.codigo : (casoActual.codigo || casoActual.id || '-');
+    const idadeCaso = casoActual.idade || '-';
+    const dataCaso = casoActual.data ? new Date(casoActual.data).toLocaleDateString('pt-PT') : '-';
+    const diagnostico = criancaActual ? criancaActual.diagnostico : '';
+    
+    // Calcular médias por domínio
+    const mediasPorDominio = [];
+    for (let d = 0; d < 5; d++) {
+        const segsDominio = casoActual.competencias.slice(d * 8, (d + 1) * 8);
+        const valoresValidos = segsDominio.filter(v => v !== null);
+        if (valoresValidos.length > 0) {
+            const media = valoresValidos.reduce((a, b) => a + b, 0) / valoresValidos.length;
+            mediasPorDominio.push({
+                dominio: DOMINIOS[d].nome,
+                media: media.toFixed(1),
+                classificacao: obterClassificacao(media),
+                valores: segsDominio
+            });
+        } else {
+            mediasPorDominio.push({
+                dominio: DOMINIOS[d].nome,
+                media: null,
+                classificacao: 'Não avaliado',
+                valores: segsDominio
+            });
+        }
+    }
+    
+    // Função auxiliar para obter classificação
+    function obterClassificacao(valor) {
+        if (valor === null) return 'Não avaliado';
+        const v = parseFloat(valor);
+        if (v <= 2) return 'Défice acentuado';
+        if (v <= 4) return 'Dificuldade moderada';
+        if (v <= 5) return 'Desempenho limítrofe';
+        if (v <= 7) return 'Desempenho típico';
+        return 'Desempenho acima da média';
+    }
+    
+    // Gerar texto narrativo para cada domínio
+    function gerarTextoNarrativo(dominioData, idx) {
+        const d = dominioData;
+        if (d.media === null) {
+            return `O domínio ${d.dominio} não foi avaliado nesta sessão.`;
+        }
+        
+        const media = parseFloat(d.media);
+        let texto = `No domínio ${d.dominio}, a criança apresenta um desempenho global classificado como "${d.classificacao}" (pontuação média: ${d.media}/10). `;
+        
+        // Analisar subcomponentes
+        const nomesDimensoes = ['Implícito-Compreensão-Oral', 'Implícito-Compreensão-Escrita', 
+                               'Implícito-Expressão-Oral', 'Implícito-Expressão-Escrita',
+                               'Explícito-Compreensão-Oral', 'Explícito-Compreensão-Escrita',
+                               'Explícito-Expressão-Oral', 'Explícito-Expressão-Escrita'];
+        
+        // Usar terminologia sublexical para Fonológico
+        const nomesDimensoesFono = ['Implícito-Perceção-Oral', 'Implícito-Perceção-Escrita', 
+                                    'Implícito-Produção-Oral', 'Implícito-Produção-Escrita',
+                                    'Explícito-Perceção-Oral', 'Explícito-Perceção-Escrita',
+                                    'Explícito-Produção-Oral', 'Explícito-Produção-Escrita'];
+        
+        const dimensoes = idx === 0 ? nomesDimensoesFono : nomesDimensoes;
+        
+        const pontosFracos = [];
+        const pontosFortes = [];
+        
+        d.valores.forEach((v, i) => {
+            if (v !== null) {
+                if (v <= 3) pontosFracos.push({ nome: dimensoes[i], valor: v });
+                else if (v >= 7) pontosFortes.push({ nome: dimensoes[i], valor: v });
+            }
+        });
+        
+        if (pontosFracos.length > 0) {
+            texto += `Verificam-se dificuldades acentuadas em: ${pontosFracos.map(p => p.nome.toLowerCase().replace(/-/g, ' ')).join(', ')}. `;
+        }
+        
+        if (pontosFortes.length > 0) {
+            texto += `Destacam-se como áreas de melhor desempenho: ${pontosFortes.map(p => p.nome.toLowerCase().replace(/-/g, ' ')).join(', ')}. `;
+        }
+        
+        // Comparação implícito vs explícito
+        const mediaImp = d.valores.slice(0, 4).filter(v => v !== null);
+        const mediaExp = d.valores.slice(4, 8).filter(v => v !== null);
+        if (mediaImp.length > 0 && mediaExp.length > 0) {
+            const mImp = mediaImp.reduce((a, b) => a + b, 0) / mediaImp.length;
+            const mExp = mediaExp.reduce((a, b) => a + b, 0) / mediaExp.length;
+            if (Math.abs(mImp - mExp) >= 2) {
+                if (mImp > mExp) {
+                    texto += `Observa-se uma dissociação entre o processamento implícito (${mImp.toFixed(1)}) e explícito (${mExp.toFixed(1)}), sugerindo maior facilidade no processamento automático. `;
+                } else {
+                    texto += `Observa-se uma dissociação entre o processamento implícito (${mImp.toFixed(1)}) e explícito (${mExp.toFixed(1)}), com melhor desempenho nas tarefas de consciência metalinguística. `;
+                }
+            }
+        }
+        
+        return texto;
+    }
+    
+    // Criar bullets para listas
+    const bulletConfig = {
+        reference: "bullet-points",
+        levels: [{
+            level: 0,
+            format: LevelFormat.BULLET,
+            text: "•",
+            alignment: AlignmentType.LEFT,
+            style: { paragraph: { indent: { left: 720, hanging: 360 } } }
+        }]
+    };
+    
+    // Criar documento
+    const doc = new Document({
+        styles: {
+            default: {
+                document: {
+                    run: { font: "Arial", size: 22 }
+                }
+            },
+            paragraphStyles: [
+                {
+                    id: "Title",
+                    name: "Title",
+                    basedOn: "Normal",
+                    run: { size: 48, bold: true, color: "00A79D", font: "Arial" },
+                    paragraph: { spacing: { after: 200 }, alignment: AlignmentType.CENTER }
+                },
+                {
+                    id: "Heading1",
+                    name: "Heading 1",
+                    basedOn: "Normal",
+                    run: { size: 28, bold: true, color: "00A79D", font: "Arial" },
+                    paragraph: { spacing: { before: 400, after: 200 } }
+                },
+                {
+                    id: "Heading2",
+                    name: "Heading 2",
+                    basedOn: "Normal",
+                    run: { size: 24, bold: true, color: "333333", font: "Arial" },
+                    paragraph: { spacing: { before: 300, after: 150 } }
+                }
+            ]
+        },
+        numbering: { config: [bulletConfig] },
+        sections: [{
+            properties: {
+                page: {
+                    margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }
+                }
+            },
+            headers: {
+                default: new Header({
+                    children: [
+                        new Paragraph({
+                            alignment: AlignmentType.RIGHT,
+                            children: [
+                                new TextRun({ text: "CAIDI — Centro de Apoio e Intervenção no Desenvolvimento Infantil", size: 18, color: "888888" })
+                            ]
+                        })
+                    ]
+                })
+            },
+            footers: {
+                default: new Footer({
+                    children: [
+                        new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [
+                                new TextRun({ text: "Página ", size: 18 }),
+                                new TextRun({ children: [PageNumber.CURRENT], size: 18 }),
+                                new TextRun({ text: " de ", size: 18 }),
+                                new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 18 }),
+                                new TextRun({ text: " | PERLIM — Perfil Linguístico Multidimensional", size: 18, color: "888888" })
+                            ]
+                        })
+                    ]
+                })
+            },
+            children: [
+                // Título
+                new Paragraph({
+                    heading: HeadingLevel.TITLE,
+                    children: [new TextRun("PERLIM")]
+                }),
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 400 },
+                    children: [new TextRun({ text: "Perfil Linguístico Multidimensional", size: 28, italics: true, color: "666666" })]
+                }),
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 400 },
+                    children: [new TextRun({ text: "Relatório de Avaliação Linguística", size: 24 })]
+                }),
+                
+                // Identificação
+                new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("1. Identificação")] }),
+                new Paragraph({
+                    spacing: { after: 100 },
+                    children: [
+                        new TextRun({ text: "Código: ", bold: true }),
+                        new TextRun(codigoCaso)
+                    ]
+                }),
+                new Paragraph({
+                    spacing: { after: 100 },
+                    children: [
+                        new TextRun({ text: "Nome: ", bold: true }),
+                        new TextRun(nomeCaso)
+                    ]
+                }),
+                new Paragraph({
+                    spacing: { after: 100 },
+                    children: [
+                        new TextRun({ text: "Idade: ", bold: true }),
+                        new TextRun(idadeCaso)
+                    ]
+                }),
+                new Paragraph({
+                    spacing: { after: 100 },
+                    children: [
+                        new TextRun({ text: "Data da Avaliação: ", bold: true }),
+                        new TextRun(dataCaso)
+                    ]
+                }),
+                ...(diagnostico ? [new Paragraph({
+                    spacing: { after: 200 },
+                    children: [
+                        new TextRun({ text: "Diagnóstico/Hipótese: ", bold: true }),
+                        new TextRun(diagnostico)
+                    ]
+                })] : []),
+                
+                // Introdução
+                new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("2. Introdução")] }),
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun(`O presente relatório apresenta os resultados da avaliação linguística realizada através do PERLIM — Perfil Linguístico Multidimensional. Este instrumento permite uma análise integrada das competências linguísticas em cinco domínios fundamentais (Fonológico, Morfológico, Sintático, Semântico e Pragmático), considerando diferentes níveis de processamento (implícito e explícito), circuitos (compreensão e expressão) e modalidades (oral e escrita).`)]
+                }),
+                new Paragraph({
+                    spacing: { after: 300 },
+                    children: [new TextRun(`A análise baseia-se no modelo teórico dos Quadrantes de Alves (2019), operacionalizado em 40 segmentos de avaliação que permitem uma caracterização detalhada do perfil linguístico da criança.`)]
+                }),
+                
+                // Resultados por Domínio
+                new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("3. Resultados por Domínio")] }),
+                
+                // Domínio Fonológico
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun("3.1. Domínio Fonológico")] }),
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun(gerarTextoNarrativo(mediasPorDominio[0], 0))]
+                }),
+                
+                // Domínio Morfológico
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun("3.2. Domínio Morfológico")] }),
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun(gerarTextoNarrativo(mediasPorDominio[1], 1))]
+                }),
+                
+                // Domínio Sintático
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun("3.3. Domínio Sintático")] }),
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun(gerarTextoNarrativo(mediasPorDominio[2], 2))]
+                }),
+                
+                // Domínio Semântico
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun("3.4. Domínio Semântico")] }),
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun(gerarTextoNarrativo(mediasPorDominio[3], 3))]
+                }),
+                
+                // Domínio Pragmático
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun("3.5. Domínio Pragmático")] }),
+                new Paragraph({
+                    spacing: { after: 300 },
+                    children: [new TextRun(gerarTextoNarrativo(mediasPorDominio[4], 4))]
+                }),
+                
+                // Síntese
+                new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("4. Síntese dos Resultados")] }),
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun(gerarSinteseGlobal(mediasPorDominio))]
+                }),
+                
+                // Tabela resumo
+                ...gerarTabelaResumo(mediasPorDominio),
+                
+                // Recomendações
+                new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("5. Orientações para Intervenção")] }),
+                ...gerarRecomendacoes(mediasPorDominio),
+                
+                // Rodapé
+                new Paragraph({
+                    spacing: { before: 600 },
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                        new TextRun({ text: "___________________________", color: "888888" })
+                    ]
+                }),
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                        new TextRun({ text: `Relatório gerado em ${new Date().toLocaleDateString('pt-PT')}`, size: 20, color: "888888" })
+                    ]
+                }),
+                new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                        new TextRun({ text: "© Joana Miguel | CAIDI | PERLIM — Modelo: Alves (2019)", size: 18, color: "888888" })
+                    ]
+                })
+            ]
+        }]
+    });
+    
+    // Função para gerar síntese global
+    function gerarSinteseGlobal(dominios) {
+        const avaliados = dominios.filter(d => d.media !== null);
+        if (avaliados.length === 0) return "Não foram registados dados suficientes para uma síntese global.";
+        
+        const mediaGlobal = avaliados.reduce((sum, d) => sum + parseFloat(d.media), 0) / avaliados.length;
+        
+        let texto = `A avaliação global revela um perfil linguístico com uma pontuação média de ${mediaGlobal.toFixed(1)}/10. `;
+        
+        // Ordenar por média
+        const ordenados = [...avaliados].sort((a, b) => parseFloat(b.media) - parseFloat(a.media));
+        
+        if (ordenados.length >= 2) {
+            texto += `O domínio com melhor desempenho é o ${ordenados[0].dominio} (${ordenados[0].media}), enquanto o domínio ${ordenados[ordenados.length - 1].dominio} apresenta os resultados mais baixos (${ordenados[ordenados.length - 1].media}). `;
+        }
+        
+        // Análise de padrões
+        const comDificuldades = avaliados.filter(d => parseFloat(d.media) < 5);
+        if (comDificuldades.length > 0) {
+            texto += `Identificam-se dificuldades que requerem atenção nos seguintes domínios: ${comDificuldades.map(d => d.dominio).join(', ')}. `;
+        }
+        
+        return texto;
+    }
+    
+    // Função para gerar tabela resumo
+    function gerarTabelaResumo(dominios) {
+        const tableBorder = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+        const cellBorders = { top: tableBorder, bottom: tableBorder, left: tableBorder, right: tableBorder };
+        
+        const headerRow = new TableRow({
+            tableHeader: true,
+            children: [
+                new TableCell({
+                    borders: cellBorders,
+                    shading: { fill: "00A79D", type: ShadingType.CLEAR },
+                    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Domínio", bold: true, color: "FFFFFF", size: 22 })] })]
+                }),
+                new TableCell({
+                    borders: cellBorders,
+                    shading: { fill: "00A79D", type: ShadingType.CLEAR },
+                    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Média", bold: true, color: "FFFFFF", size: 22 })] })]
+                }),
+                new TableCell({
+                    borders: cellBorders,
+                    shading: { fill: "00A79D", type: ShadingType.CLEAR },
+                    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Classificação", bold: true, color: "FFFFFF", size: 22 })] })]
+                })
+            ]
+        });
+        
+        const dataRows = dominios.map(d => {
+            const fillColor = d.media === null ? "F5F5F5" : (parseFloat(d.media) < 5 ? "FFEBEE" : "E8F5E9");
+            return new TableRow({
+                children: [
+                    new TableCell({
+                        borders: cellBorders,
+                        shading: { fill: fillColor, type: ShadingType.CLEAR },
+                        children: [new Paragraph({ children: [new TextRun({ text: d.dominio, bold: true })] })]
+                    }),
+                    new TableCell({
+                        borders: cellBorders,
+                        shading: { fill: fillColor, type: ShadingType.CLEAR },
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(d.media !== null ? `${d.media}/10` : "-")] })]
+                    }),
+                    new TableCell({
+                        borders: cellBorders,
+                        shading: { fill: fillColor, type: ShadingType.CLEAR },
+                        children: [new Paragraph({ children: [new TextRun(d.classificacao)] })]
+                    })
+                ]
+            });
+        });
+        
+        return [
+            new Paragraph({ spacing: { before: 200, after: 100 } }),
+            new Table({
+                columnWidths: [3000, 2000, 4360],
+                rows: [headerRow, ...dataRows]
+            }),
+            new Paragraph({ spacing: { after: 300 } })
+        ];
+    }
+    
+    // Função para gerar recomendações
+    function gerarRecomendacoes(dominios) {
+        const comDificuldades = dominios.filter(d => d.media !== null && parseFloat(d.media) < 5);
+        
+        if (comDificuldades.length === 0) {
+            return [
+                new Paragraph({
+                    spacing: { after: 200 },
+                    children: [new TextRun("Com base nos resultados obtidos, não se identificam áreas de dificuldade acentuada. Recomenda-se a continuação do acompanhamento do desenvolvimento linguístico e a estimulação das competências em contexto natural.")]
+                })
+            ];
+        }
+        
+        const paragrafos = [
+            new Paragraph({
+                spacing: { after: 200 },
+                children: [new TextRun("Com base nos resultados obtidos, recomendam-se as seguintes orientações para intervenção:")]
+            })
+        ];
+        
+        const recomendacoesPorDominio = {
+            'Fonológico': [
+                "Trabalhar a discriminação auditiva de sons da fala",
+                "Desenvolver atividades de consciência fonológica (rimas, sílabas, fonemas)",
+                "Estimular a produção articulatória em contexto lúdico"
+            ],
+            'Morfológico': [
+                "Trabalhar a formação de palavras (prefixos, sufixos, flexões)",
+                "Estimular o uso correto de concordâncias gramaticais",
+                "Desenvolver atividades de consciência morfológica"
+            ],
+            'Sintático': [
+                "Estimular a construção de frases com diferentes estruturas",
+                "Trabalhar a compreensão de orações complexas",
+                "Desenvolver a organização do discurso narrativo"
+            ],
+            'Semântico': [
+                "Ampliar o vocabulário através de categorização e associação",
+                "Trabalhar relações entre palavras (sinónimos, antónimos)",
+                "Desenvolver a compreensão de linguagem figurada"
+            ],
+            'Pragmático': [
+                "Estimular as competências comunicativas em contexto social",
+                "Trabalhar a adequação do discurso ao contexto",
+                "Desenvolver competências de narrativa e conversação"
+            ]
+        };
+        
+        comDificuldades.forEach(d => {
+            paragrafos.push(
+                new Paragraph({
+                    spacing: { before: 200, after: 100 },
+                    children: [new TextRun({ text: `${d.dominio}:`, bold: true })]
+                })
+            );
+            
+            const recs = recomendacoesPorDominio[d.dominio] || [];
+            recs.forEach(rec => {
+                paragrafos.push(
+                    new Paragraph({
+                        numbering: { reference: "bullet-points", level: 0 },
+                        children: [new TextRun(rec)]
+                    })
+                );
+            });
+        });
+        
+        return paragrafos;
+    }
+    
+    // Gerar e descarregar
+    try {
+        const buffer = await Packer.toBuffer(doc);
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `PERLIM_${codigoCaso}_${dataCaso.replace(/\//g, '-')}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarToast('Relatório Word exportado!', 'success');
+    } catch (error) {
+        console.error('Erro ao gerar Word:', error);
+        mostrarToast('Erro ao gerar relatório Word', 'error');
+    }
 }
 
 // ============================================================================
