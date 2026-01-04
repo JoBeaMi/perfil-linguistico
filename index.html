@@ -103,11 +103,8 @@
                     </div>
                 </div>
                 <nav class="header-nav">
-                    <button class="btn-icon" id="btn-dashboard" title="Dashboard">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    </button>
-                    <button class="btn-icon" id="btn-history" title="Histórico de Casos (H)">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <button class="btn-icon" id="btn-gestao" title="Gestão de Casos (G)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v4h-7zM14 10h7v11h-7zM3 13h7v8H3z"/></svg>
                     </button>
                     <button class="btn-icon" id="btn-info" title="Informações (I)">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
@@ -413,36 +410,220 @@
             </div>
             <div class="footer-bottom">
                 <p>© 2025 Joana Miguel · Todos os direitos reservados</p>
-                <p class="shortcuts-hint">Atalhos: <kbd>G</kbd> Gerar · <kbd>E</kbd> Exemplo · <kbd>T</kbd> Tema · <kbd>H</kbd> Histórico · <kbd>F</kbd> Ecrã completo</p>
+                <p class="shortcuts-hint">Atalhos: <kbd>G</kbd> Gestão · <kbd>E</kbd> Exemplo · <kbd>T</kbd> Tema · <kbd>F</kbd> Ecrã completo</p>
             </div>
         </footer>
 
         <!-- Modals -->
         <!-- History Modal -->
-        <div class="modal" id="modal-history">
-            <div class="modal-content modal-lg">
+        <!-- PAINEL DE GESTÃO UNIFICADO -->
+        <div class="modal" id="modal-gestao">
+            <div class="modal-content modal-xl">
                 <div class="modal-header">
                     <h2>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Histórico de Casos
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v4h-7zM14 10h7v11h-7zM3 13h7v8H3z"/></svg>
+                        Gestão de Casos
                     </h2>
-                    <button class="btn-close" data-close-modal>
+                    <button class="btn-close" data-close>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="history-actions">
-                        <input type="text" id="history-search" placeholder="Pesquisar casos..." class="search-input">
-                        <button class="btn btn-secondary" id="btn-import-json">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                            Importar
+                <div class="modal-body gestao-body">
+                    <!-- Tabs de navegação -->
+                    <div class="gestao-tabs">
+                        <button class="gestao-tab active" data-gestao-tab="visao-geral">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+                            Visão Geral
                         </button>
-                        <button class="btn btn-secondary" id="btn-export-all">
+                        <button class="gestao-tab" data-gestao-tab="criancas">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a7.5 7.5 0 0115 0"/></svg>
+                            Crianças
+                        </button>
+                        <button class="gestao-tab" data-gestao-tab="avaliacoes">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8"/></svg>
+                            Avaliações
+                        </button>
+                        <button class="gestao-tab" data-gestao-tab="evolucao">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            Evolução
+                        </button>
+                        <button class="gestao-tab" data-gestao-tab="exportacao">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                            Exportar Todos
+                            Importar/Exportar
                         </button>
                     </div>
-                    <div id="history-list" class="history-list"></div>
+                    
+                    <!-- Conteúdo das tabs -->
+                    <div class="gestao-content">
+                        <!-- TAB: Visão Geral -->
+                        <div class="gestao-panel active" id="panel-visao-geral">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">👶</div>
+                                    <div class="stat-value" id="stat-criancas">0</div>
+                                    <div class="stat-label">Crianças</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-value" id="stat-avaliacoes">0</div>
+                                    <div class="stat-label">Avaliações</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📅</div>
+                                    <div class="stat-value" id="stat-mes">0</div>
+                                    <div class="stat-label">Este Mês</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🎯</div>
+                                    <div class="stat-value" id="stat-media">-</div>
+                                    <div class="stat-label">Média Global</div>
+                                </div>
+                            </div>
+                            
+                            <div class="visao-grid">
+                                <div class="visao-section">
+                                    <h4>Distribuição por Faixa Etária</h4>
+                                    <div class="chart-container" id="chart-idades"></div>
+                                </div>
+                                <div class="visao-section">
+                                    <h4>Domínios com Mais Dificuldades</h4>
+                                    <div class="chart-container" id="chart-dominios"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="visao-section">
+                                <h4>Avaliações Recentes</h4>
+                                <div class="avaliacoes-recentes" id="avaliacoes-recentes"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Crianças -->
+                        <div class="gestao-panel" id="panel-criancas">
+                            <div class="panel-toolbar">
+                                <input type="text" id="pesquisa-criancas" placeholder="Pesquisar por nome ou código..." class="search-input">
+                                <select id="filtro-criancas-idade" class="filter-select">
+                                    <option value="">Todas as idades</option>
+                                    <option value="0-3">0-3 anos</option>
+                                    <option value="3-6">3-6 anos</option>
+                                    <option value="6-10">6-10 anos</option>
+                                    <option value="10+">10+ anos</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="abrirNovaCrianca()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                                    Nova Criança
+                                </button>
+                            </div>
+                            <div class="criancas-lista" id="gestao-criancas-lista"></div>
+                        </div>
+                        
+                        <!-- TAB: Avaliações -->
+                        <div class="gestao-panel" id="panel-avaliacoes">
+                            <div class="panel-toolbar">
+                                <input type="text" id="pesquisa-avaliacoes" placeholder="Pesquisar avaliações..." class="search-input">
+                                <select id="filtro-crianca" class="filter-select">
+                                    <option value="">Todas as crianças</option>
+                                </select>
+                                <input type="date" id="filtro-data-de" class="filter-date" title="De">
+                                <input type="date" id="filtro-data-ate" class="filter-date" title="Até">
+                            </div>
+                            <div class="avaliacoes-lista" id="gestao-avaliacoes-lista"></div>
+                            <div class="panel-footer">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" id="seleccionar-todas-avaliacoes">
+                                    Seleccionar todas
+                                </label>
+                                <div class="footer-actions">
+                                    <button class="btn btn-secondary" id="btn-comparar-seleccionados" disabled>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                                        Comparar
+                                    </button>
+                                    <button class="btn btn-secondary" id="btn-exportar-seleccionados" disabled>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                        Exportar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Evolução -->
+                        <div class="gestao-panel" id="panel-evolucao">
+                            <div class="panel-toolbar">
+                                <select id="evolucao-crianca" class="filter-select filter-select-lg">
+                                    <option value="">Seleccionar criança...</option>
+                                </select>
+                            </div>
+                            <div class="evolucao-content" id="evolucao-content">
+                                <div class="evolucao-placeholder">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                    <p>Seleccione uma criança para ver a evolução das avaliações</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Importar/Exportar -->
+                        <div class="gestao-panel" id="panel-exportacao">
+                            <div class="export-sections">
+                                <div class="export-section">
+                                    <h4>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                        Importar Dados
+                                    </h4>
+                                    <p class="text-muted">Importar avaliações de ficheiros externos</p>
+                                    <div class="import-options">
+                                        <button class="btn btn-secondary btn-import" id="btn-import-json">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                                            Importar JSON
+                                        </button>
+                                        <button class="btn btn-secondary btn-import" id="btn-import-excel">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h2m4 0h2M8 17h2m4 0h2"/></svg>
+                                            Importar Excel
+                                        </button>
+                                    </div>
+                                    <input type="file" id="input-import-file" accept=".json,.xlsx,.xls" style="display:none">
+                                </div>
+                                
+                                <div class="export-section">
+                                    <h4>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                        Exportar Dados
+                                    </h4>
+                                    <p class="text-muted">Exportar dados para análise externa</p>
+                                    
+                                    <div class="export-filters">
+                                        <div class="filter-group">
+                                            <label>Período</label>
+                                            <div class="date-range">
+                                                <input type="date" id="export-data-de">
+                                                <span>até</span>
+                                                <input type="date" id="export-data-ate">
+                                            </div>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label>Crianças</label>
+                                            <select id="export-criancas" multiple class="multi-select">
+                                                <option value="todas" selected>Todas</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="export-options">
+                                        <button class="btn btn-primary btn-export" id="btn-export-excel">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h2m4 0h2M8 17h2m4 0h2"/></svg>
+                                            Excel (.xlsx)
+                                        </button>
+                                        <button class="btn btn-secondary btn-export" id="btn-export-csv">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                                            CSV
+                                        </button>
+                                        <button class="btn btn-secondary btn-export" id="btn-export-json-all">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                                            JSON
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -455,7 +636,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
                         Informações
                     </h2>
-                    <button class="btn-close" data-close-modal>
+                    <button class="btn-close" data-close>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -479,7 +660,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                         Exportar Perfil
                     </h2>
-                    <button class="btn-close" data-close-modal>
+                    <button class="btn-close" data-close>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -510,44 +691,6 @@
                             <span>CSV</span>
                             <small>Folha de cálculo</small>
                         </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Dashboard -->
-        <div class="modal" id="modal-dashboard">
-            <div class="modal-content modal-xl">
-                <div class="modal-header">
-                    <h3>Dashboard</h3>
-                    <button class="modal-close" data-close>&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="dashboard-stats" id="dashboard-stats">
-                        <div class="stat-card">
-                            <div class="stat-icon">📊</div>
-                            <div class="stat-value" id="stat-total-casos">0</div>
-                            <div class="stat-label">Total de Casos</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">📅</div>
-                            <div class="stat-value" id="stat-casos-mes">0</div>
-                            <div class="stat-label">Este Mês</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🎯</div>
-                            <div class="stat-value" id="stat-media-comp">-</div>
-                            <div class="stat-label">Média Competências</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">📝</div>
-                            <div class="stat-value" id="stat-provas-custom">0</div>
-                            <div class="stat-label">Provas Custom</div>
-                        </div>
-                    </div>
-                    <div class="dashboard-section">
-                        <h4>Casos Recentes</h4>
-                        <div class="casos-grid" id="casos-recentes"></div>
                     </div>
                 </div>
             </div>
@@ -728,7 +871,7 @@
             <div class="modal-content modal-xl">
                 <div class="modal-header">
                     <h2>👤 Ficha da Criança</h2>
-                    <button class="btn-close" data-close-modal>
+                    <button class="btn-close" data-close>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -970,7 +1113,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-close>Cancelar</button>
                     <button type="button" class="btn btn-primary btn-guardar-destaque" id="btn-guardar-crianca">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                         Guardar Criança
@@ -984,7 +1127,7 @@
             <div class="modal-content modal-lg">
                 <div class="modal-header">
                     <h2>👤 Seleccionar Criança</h2>
-                    <button class="btn-close" data-close-modal>
+                    <button class="btn-close" data-close>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -1010,6 +1153,7 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/data.js"></script>
     <script src="js/radar.js"></script>
