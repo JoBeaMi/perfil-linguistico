@@ -423,10 +423,9 @@ function inicializarEventListeners() {
     document.getElementById('btn-export').addEventListener('click', () => abrirModal('modal-export'));
     document.getElementById('btn-add-prova').addEventListener('click', adicionarProva);
     
-    // Header
-    document.getElementById('btn-history').addEventListener('click', () => {
-        actualizarListaHistorico();
-        abrirModal('modal-history');
+    // Header - Painel de Gestão
+    document.getElementById('btn-gestao').addEventListener('click', () => {
+        abrirPainelGestao();
     });
     document.getElementById('btn-info').addEventListener('click', () => {
         mostrarInfoTab('provas');
@@ -2710,7 +2709,7 @@ function tratarAtalhos(e) {
     if (e.ctrlKey && e.key.toLowerCase() === 'l') { e.preventDefault(); limparFormulario(); }
     if (e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); abrirModal('modal-export'); }
     if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); guardarCasoActual(); mostrarToast('Guardado!', 'success'); }
-    if (e.key.toLowerCase() === 'h' && !e.ctrlKey) { e.preventDefault(); actualizarListaHistorico(); abrirModal('modal-history'); }
+    if (e.key.toLowerCase() === 'g' && !e.ctrlKey) { e.preventDefault(); abrirPainelGestao(); }
     if (e.key.toLowerCase() === 'i' && !e.ctrlKey) { e.preventDefault(); mostrarInfoTab('provas'); abrirModal('modal-info'); }
     if (e.key.toLowerCase() === 't' && !e.ctrlKey) { e.preventDefault(); toggleTema(); }
     if (e.key.toLowerCase() === 'f' && !e.ctrlKey) { e.preventDefault(); toggleFullscreen(); }
@@ -2802,15 +2801,35 @@ function inicializarAuth() {
         mostrarToast('Sessão terminada', 'info');
     });
     
-    // Dashboard
-    document.getElementById('btn-dashboard').addEventListener('click', () => {
-        if (API.isAuthenticated()) {
-            carregarDashboard();
-            abrirModal('modal-dashboard');
-        } else {
-            abrirModal('modal-auth');
-        }
+    // Tabs do Painel de Gestão
+    document.querySelectorAll('.gestao-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.dataset.gestaoTab;
+            mudarTabGestao(tabId);
+        });
     });
+    
+    // Filtros e pesquisas do painel
+    document.getElementById('pesquisa-criancas')?.addEventListener('input', filtrarCriancasGestao);
+    document.getElementById('pesquisa-avaliacoes')?.addEventListener('input', filtrarAvaliacoesGestao);
+    document.getElementById('filtro-crianca')?.addEventListener('change', filtrarAvaliacoesGestao);
+    document.getElementById('evolucao-crianca')?.addEventListener('change', carregarEvolucaoCrianca);
+    
+    // Checkbox seleccionar todas
+    document.getElementById('seleccionar-todas-avaliacoes')?.addEventListener('change', (e) => {
+        document.querySelectorAll('.gestao-item-check').forEach(cb => {
+            cb.checked = e.target.checked;
+        });
+        actualizarBotoesSeleccao();
+    });
+    
+    // Botões de importação/exportação
+    document.getElementById('btn-import-json')?.addEventListener('click', () => iniciarImportacao('json'));
+    document.getElementById('btn-import-excel')?.addEventListener('click', () => iniciarImportacao('excel'));
+    document.getElementById('input-import-file')?.addEventListener('change', processarImportacao);
+    document.getElementById('btn-export-excel')?.addEventListener('click', () => exportarDados('excel'));
+    document.getElementById('btn-export-csv')?.addEventListener('click', () => exportarDados('csv'));
+    document.getElementById('btn-export-json-all')?.addEventListener('click', () => exportarDados('json'));
     
     // Editar prova aplicada
     document.getElementById('btn-salvar-edicao-prova').addEventListener('click', salvarEdicaoProva);
@@ -2867,75 +2886,731 @@ async function carregarProvasCustomCloud() {
 // ============================================================================
 // DASHBOARD
 // ============================================================================
+// PAINEL DE GESTÃO UNIFICADO
+// ============================================================================
 
-async function carregarDashboard() {
-    if (!API.isAuthenticated()) return;
+let dadosGestao = {
+    criancas: [],
+    avaliacoes: [],
+    criancasFiltradas: [],
+    avaliacoesFiltradas: []
+};
+
+function abrirPainelGestao() {
+    if (!API.isAuthenticated()) {
+        abrirModal('modal-auth');
+        return;
+    }
     
+    carregarDadosGestao();
+    abrirModal('modal-gestao');
+}
+
+async function carregarDadosGestao() {
     try {
-        const casos = await API.listarCasos();
-        const provasCustom = await API.listarProvasCustom();
+        // Carregar crianças
+        const criancasResponse = await API.listarCriancas();
+        dadosGestao.criancas = criancasResponse || [];
         
-        // Estatísticas
-        const agora = new Date();
-        const mesActual = agora.getMonth();
-        const anoActual = agora.getFullYear();
+        // Carregar avaliações/casos
+        const casosResponse = await API.listarCasos();
+        dadosGestao.avaliacoes = casosResponse || [];
         
-        const casosMes = casos.filter(c => {
-            const d = new Date(c.criado_em);
-            return d.getMonth() === mesActual && d.getFullYear() === anoActual;
-        });
+        // Actualizar todas as tabs
+        actualizarVisaoGeral();
+        actualizarListaCriancas();
+        actualizarListaAvaliacoes();
+        preencherSelectsCriancas();
         
-        // Média de competências
-        let somaComp = 0, countComp = 0;
-        casos.forEach(c => {
-            if (c.competencias?.length) {
-                c.competencias.forEach(comp => { somaComp += comp; countComp++; });
-            }
-        });
-        const mediaComp = countComp > 0 ? (somaComp / countComp).toFixed(1) : '-';
-        
-        document.getElementById('stat-total-casos').textContent = casos.length;
-        document.getElementById('stat-casos-mes').textContent = casosMes.length;
-        document.getElementById('stat-media-comp').textContent = mediaComp;
-        document.getElementById('stat-provas-custom').textContent = provasCustom.length;
-        
-        // Lista de casos recentes
-        const container = document.getElementById('casos-recentes');
-        if (casos.length === 0) {
-            container.innerHTML = '<p class="text-muted">Nenhum caso guardado ainda.</p>';
-        } else {
-            container.innerHTML = casos.slice(0, 8).map(c => `
-                <div class="caso-card" onclick="carregarCasoCloud('${c.id}')">
-                    <div class="caso-card-header">
-                        <h5>${c.nome || c.id}</h5>
-                        <small>${new Date(c.criado_em).toLocaleDateString('pt-PT')}</small>
-                    </div>
-                    <div class="caso-card-meta">
-                        <span>📊 ${c.provasAplicadas?.length || 0} provas</span>
-                        <span>🎂 ${c.idade || '-'}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        mostrarToast('Erro ao carregar dashboard', 'error');
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        mostrarToast('Erro ao carregar dados', 'error');
     }
 }
 
-async function carregarCasoCloud(id) {
+function mudarTabGestao(tabId) {
+    // Actualizar tabs
+    document.querySelectorAll('.gestao-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.gestaoTab === tabId);
+    });
+    
+    // Actualizar painéis
+    document.querySelectorAll('.gestao-panel').forEach(p => {
+        p.classList.toggle('active', p.id === `panel-${tabId}`);
+    });
+}
+
+// --- VISÃO GERAL ---
+function actualizarVisaoGeral() {
+    const criancas = dadosGestao.criancas;
+    const avaliacoes = dadosGestao.avaliacoes;
+    
+    // Estatísticas
+    const agora = new Date();
+    const mesActual = agora.getMonth();
+    const anoActual = agora.getFullYear();
+    
+    const avaliacoesMes = avaliacoes.filter(a => {
+        const d = new Date(a.criado_em || a.data_avaliacao);
+        return d.getMonth() === mesActual && d.getFullYear() === anoActual;
+    });
+    
+    // Média global
+    let somaComp = 0, countComp = 0;
+    avaliacoes.forEach(a => {
+        if (a.competencias?.length) {
+            a.competencias.forEach(c => {
+                if (c !== null && !isNaN(c)) { somaComp += c; countComp++; }
+            });
+        }
+    });
+    const mediaGlobal = countComp > 0 ? (somaComp / countComp).toFixed(1) : '-';
+    
+    document.getElementById('stat-criancas').textContent = criancas.length;
+    document.getElementById('stat-avaliacoes').textContent = avaliacoes.length;
+    document.getElementById('stat-mes').textContent = avaliacoesMes.length;
+    document.getElementById('stat-media').textContent = mediaGlobal;
+    
+    // Gráfico de idades
+    renderizarGraficoIdades(criancas);
+    
+    // Gráfico de domínios
+    renderizarGraficoDominios(avaliacoes);
+    
+    // Avaliações recentes
+    renderizarAvaliacoesRecentes(avaliacoes.slice(0, 6));
+}
+
+function renderizarGraficoIdades(criancas) {
+    const container = document.getElementById('chart-idades');
+    if (!container) return;
+    
+    const faixas = { '0-3': 0, '3-6': 0, '6-10': 0, '10+': 0 };
+    
+    criancas.forEach(c => {
+        if (c.data_nascimento) {
+            const idade = calcularIdadeAnos(c.data_nascimento);
+            if (idade < 3) faixas['0-3']++;
+            else if (idade < 6) faixas['3-6']++;
+            else if (idade < 10) faixas['6-10']++;
+            else faixas['10+']++;
+        }
+    });
+    
+    const max = Math.max(...Object.values(faixas), 1);
+    
+    container.innerHTML = Object.entries(faixas).map(([label, value]) => `
+        <div class="chart-bar" style="height: ${(value / max) * 100}%">
+            <span class="chart-bar-value">${value}</span>
+            <span class="chart-bar-label">${label}</span>
+        </div>
+    `).join('');
+}
+
+function renderizarGraficoDominios(avaliacoes) {
+    const container = document.getElementById('chart-dominios');
+    if (!container) return;
+    
+    const dominios = ['Fono', 'Morf', 'Sint', 'Sem', 'Prag'];
+    const medias = [0, 0, 0, 0, 0];
+    const counts = [0, 0, 0, 0, 0];
+    
+    avaliacoes.forEach(a => {
+        if (a.competencias?.length >= 40) {
+            for (let d = 0; d < 5; d++) {
+                const segs = a.competencias.slice(d * 8, (d + 1) * 8);
+                segs.forEach(v => {
+                    if (v !== null && !isNaN(v)) {
+                        medias[d] += v;
+                        counts[d]++;
+                    }
+                });
+            }
+        }
+    });
+    
+    const cores = ['#E05252', '#E8A54C', '#00A79D', '#5B8BC4', '#7CB454'];
+    
+    container.innerHTML = dominios.map((dom, i) => {
+        const media = counts[i] > 0 ? (medias[i] / counts[i]) : 0;
+        const altura = (media / 10) * 100;
+        return `
+            <div class="chart-bar" style="height: ${altura}%; background: ${cores[i]}">
+                <span class="chart-bar-value">${media.toFixed(1)}</span>
+                <span class="chart-bar-label">${dom}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderizarAvaliacoesRecentes(avaliacoes) {
+    const container = document.getElementById('avaliacoes-recentes');
+    if (!container) return;
+    
+    if (avaliacoes.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhuma avaliação registada</p>';
+        return;
+    }
+    
+    container.innerHTML = avaliacoes.map(a => `
+        <div class="avaliacao-card" onclick="carregarAvaliacaoGestao(${a.id})">
+            <div class="gestao-item-avatar">${(a.nome || a.codigo || '?')[0].toUpperCase()}</div>
+            <div class="avaliacao-card-info">
+                <h5>${a.codigo || a.nome || 'Sem código'}</h5>
+                <small>${a.data_avaliacao ? new Date(a.data_avaliacao).toLocaleDateString('pt-PT') : '-'}</small>
+            </div>
+            ${renderizarMiniRadar(a.competencias)}
+        </div>
+    `).join('');
+}
+
+function renderizarMiniRadar(competencias) {
+    if (!competencias || competencias.length < 40) return '';
+    
+    const cores = ['#E05252', '#E8A54C', '#00A79D', '#5B8BC4', '#7CB454'];
+    
+    let html = '<div class="mini-radar">';
+    for (let d = 0; d < 5; d++) {
+        const segs = competencias.slice(d * 8, (d + 1) * 8);
+        const vals = segs.filter(v => v !== null && !isNaN(v));
+        const media = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+        const altura = Math.max(4, (media / 10) * 24);
+        html += `<div class="mini-radar-bar" style="height: ${altura}px; background: ${cores[d]}"></div>`;
+    }
+    html += '</div>';
+    return html;
+}
+
+// --- CRIANÇAS ---
+function actualizarListaCriancas() {
+    const container = document.getElementById('gestao-criancas-lista');
+    if (!container) return;
+    
+    const criancas = dadosGestao.criancasFiltradas.length > 0 ? dadosGestao.criancasFiltradas : dadosGestao.criancas;
+    
+    if (criancas.length === 0) {
+        container.innerHTML = '<div class="evolucao-placeholder"><p>Nenhuma criança registada</p></div>';
+        return;
+    }
+    
+    container.innerHTML = criancas.map(c => {
+        const numAvaliacoes = dadosGestao.avaliacoes.filter(a => a.crianca_id === c.id).length;
+        const idade = c.data_nascimento ? calcularIdadeAnos(c.data_nascimento) : null;
+        
+        return `
+            <div class="gestao-item" onclick="seleccionarCriancaGestao(${c.id})">
+                <div class="gestao-item-avatar">${(c.nome || '?')[0].toUpperCase()}</div>
+                <div class="gestao-item-info">
+                    <h5>${c.codigo} - ${c.nome || 'Sem nome'}</h5>
+                    <p>${c.diagnostico || 'Sem diagnóstico'}</p>
+                </div>
+                <div class="gestao-item-meta">
+                    <span>${idade !== null ? idade + ' anos' : '-'}</span>
+                    <span>${numAvaliacoes} avaliações</span>
+                </div>
+                <div class="gestao-item-actions">
+                    <button class="btn-mini" onclick="event.stopPropagation(); editarCrianca(${c.id})" title="Editar">✏️</button>
+                    <button class="btn-mini" onclick="event.stopPropagation(); novaAvaliacaoCrianca(${c.id})" title="Nova Avaliação">+</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filtrarCriancasGestao() {
+    const termo = document.getElementById('pesquisa-criancas')?.value.toLowerCase() || '';
+    const filtroIdade = document.getElementById('filtro-criancas-idade')?.value || '';
+    
+    dadosGestao.criancasFiltradas = dadosGestao.criancas.filter(c => {
+        const matchTermo = !termo || 
+            (c.nome || '').toLowerCase().includes(termo) ||
+            (c.codigo || '').toLowerCase().includes(termo);
+        
+        let matchIdade = true;
+        if (filtroIdade && c.data_nascimento) {
+            const idade = calcularIdadeAnos(c.data_nascimento);
+            switch (filtroIdade) {
+                case '0-3': matchIdade = idade < 3; break;
+                case '3-6': matchIdade = idade >= 3 && idade < 6; break;
+                case '6-10': matchIdade = idade >= 6 && idade < 10; break;
+                case '10+': matchIdade = idade >= 10; break;
+            }
+        }
+        
+        return matchTermo && matchIdade;
+    });
+    
+    actualizarListaCriancas();
+}
+
+function seleccionarCriancaGestao(id) {
+    const crianca = dadosGestao.criancas.find(c => c.id === id);
+    if (crianca) {
+        criancaActual = crianca;
+        actualizarDisplayCrianca();
+        fecharModal('modal-gestao');
+        mostrarToast(`Criança "${crianca.nome}" seleccionada`, 'success');
+    }
+}
+
+function novaAvaliacaoCrianca(id) {
+    const crianca = dadosGestao.criancas.find(c => c.id === id);
+    if (crianca) {
+        criancaActual = crianca;
+        actualizarDisplayCrianca();
+        novoCaso();
+        fecharModal('modal-gestao');
+        mostrarToast(`Nova avaliação para "${crianca.nome}"`, 'info');
+    }
+}
+
+// --- AVALIAÇÕES ---
+function actualizarListaAvaliacoes() {
+    const container = document.getElementById('gestao-avaliacoes-lista');
+    if (!container) return;
+    
+    const avaliacoes = dadosGestao.avaliacoesFiltradas.length > 0 ? dadosGestao.avaliacoesFiltradas : dadosGestao.avaliacoes;
+    
+    if (avaliacoes.length === 0) {
+        container.innerHTML = '<div class="evolucao-placeholder"><p>Nenhuma avaliação registada</p></div>';
+        return;
+    }
+    
+    container.innerHTML = avaliacoes.map(a => {
+        const media = calcularMediaAvaliacao(a.competencias);
+        const badge = media === null ? '' : 
+            media < 5 ? '<span class="gestao-item-badge badge-red">Dificuldade</span>' :
+            media < 7 ? '<span class="gestao-item-badge badge-yellow">Atenção</span>' :
+            '<span class="gestao-item-badge badge-green">Adequado</span>';
+        
+        return `
+            <div class="gestao-item">
+                <input type="checkbox" class="gestao-item-check" data-id="${a.id}" onchange="actualizarBotoesSeleccao()">
+                <div class="gestao-item-avatar">${(a.nome || a.codigo || '?')[0].toUpperCase()}</div>
+                <div class="gestao-item-info">
+                    <h5>${a.codigo || 'Sem código'} ${a.nome ? '- ' + a.nome : ''}</h5>
+                    <p>Avaliação: ${a.data_avaliacao ? new Date(a.data_avaliacao).toLocaleDateString('pt-PT') : '-'}</p>
+                </div>
+                ${renderizarMiniRadar(a.competencias)}
+                ${badge}
+                <div class="gestao-item-actions">
+                    <button class="btn-mini" onclick="carregarAvaliacaoGestao(${a.id})" title="Carregar">↗</button>
+                    <button class="btn-mini" onclick="exportarAvaliacaoWord(${a.id})" title="Word">W</button>
+                    <button class="btn-mini" onclick="eliminarAvaliacaoGestao(${a.id})" title="Eliminar">×</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filtrarAvaliacoesGestao() {
+    const termo = document.getElementById('pesquisa-avaliacoes')?.value.toLowerCase() || '';
+    const criancaId = document.getElementById('filtro-crianca')?.value || '';
+    const dataDe = document.getElementById('filtro-data-de')?.value || '';
+    const dataAte = document.getElementById('filtro-data-ate')?.value || '';
+    
+    dadosGestao.avaliacoesFiltradas = dadosGestao.avaliacoes.filter(a => {
+        const matchTermo = !termo || 
+            (a.nome || '').toLowerCase().includes(termo) ||
+            (a.codigo || '').toLowerCase().includes(termo);
+        
+        const matchCrianca = !criancaId || a.crianca_id == criancaId;
+        
+        let matchData = true;
+        if (a.data_avaliacao) {
+            const dataAval = new Date(a.data_avaliacao);
+            if (dataDe) matchData = matchData && dataAval >= new Date(dataDe);
+            if (dataAte) matchData = matchData && dataAval <= new Date(dataAte);
+        }
+        
+        return matchTermo && matchCrianca && matchData;
+    });
+    
+    actualizarListaAvaliacoes();
+}
+
+function calcularMediaAvaliacao(competencias) {
+    if (!competencias || competencias.length === 0) return null;
+    const vals = competencias.filter(v => v !== null && !isNaN(v));
+    if (vals.length === 0) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+function actualizarBotoesSeleccao() {
+    const seleccionados = document.querySelectorAll('.gestao-item-check:checked').length;
+    document.getElementById('btn-comparar-seleccionados').disabled = seleccionados < 2;
+    document.getElementById('btn-exportar-seleccionados').disabled = seleccionados === 0;
+}
+
+async function carregarAvaliacaoGestao(id) {
     try {
         const caso = await API.obterCaso(id);
-        casoActual = caso;
-        preencherFormulario(caso);
-        caso.competencias?.forEach((comp, i) => {
-            radarChart.setValor(i, comp);
-        });
-        radarChart.desenhar();
-        fecharModal('modal-dashboard');
-        mostrarToast('Caso carregado!', 'success');
-    } catch (err) {
-        mostrarToast('Erro ao carregar caso', 'error');
+        if (caso) {
+            casoActual = {
+                id: caso.codigo,
+                codigo: caso.codigo,
+                nome: caso.nome,
+                idade: caso.idade,
+                data: caso.data_avaliacao,
+                escolaridade: caso.ano_escolar,
+                avaliador: caso.avaliador,
+                competencias: caso.competencias || new Array(40).fill(null),
+                provasAplicadas: []
+            };
+            
+            preencherFormulario(casoActual);
+            (casoActual.competencias || []).forEach((comp, i) => {
+                radarChart.setValor(i, comp);
+            });
+            radarChart.desenhar();
+            fecharModal('modal-gestao');
+            mostrarToast('Avaliação carregada!', 'success');
+        }
+    } catch (error) {
+        mostrarToast('Erro ao carregar avaliação', 'error');
     }
+}
+
+async function eliminarAvaliacaoGestao(id) {
+    if (!confirm('Eliminar esta avaliação?')) return;
+    
+    try {
+        await API.eliminarCaso(id);
+        dadosGestao.avaliacoes = dadosGestao.avaliacoes.filter(a => a.id !== id);
+        actualizarListaAvaliacoes();
+        actualizarVisaoGeral();
+        mostrarToast('Avaliação eliminada', 'warning');
+    } catch (error) {
+        mostrarToast('Erro ao eliminar', 'error');
+    }
+}
+
+// --- EVOLUÇÃO ---
+function preencherSelectsCriancas() {
+    const selects = ['filtro-crianca', 'evolucao-crianca', 'export-criancas'];
+    
+    selects.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        
+        const primeiraOpcao = select.querySelector('option');
+        select.innerHTML = '';
+        if (primeiraOpcao) select.appendChild(primeiraOpcao);
+        
+        dadosGestao.criancas.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `${c.codigo} - ${c.nome || 'Sem nome'}`;
+            select.appendChild(opt);
+        });
+    });
+}
+
+function carregarEvolucaoCrianca() {
+    const criancaId = document.getElementById('evolucao-crianca')?.value;
+    const container = document.getElementById('evolucao-content');
+    if (!container) return;
+    
+    if (!criancaId) {
+        container.innerHTML = `
+            <div class="evolucao-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <p>Seleccione uma criança para ver a evolução</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const avaliacoes = dadosGestao.avaliacoes
+        .filter(a => a.crianca_id == criancaId)
+        .sort((a, b) => new Date(a.data_avaliacao) - new Date(b.data_avaliacao));
+    
+    if (avaliacoes.length === 0) {
+        container.innerHTML = '<div class="evolucao-placeholder"><p>Nenhuma avaliação para esta criança</p></div>';
+        return;
+    }
+    
+    if (avaliacoes.length === 1) {
+        container.innerHTML = '<div class="evolucao-placeholder"><p>Apenas 1 avaliação. São necessárias pelo menos 2 para comparar evolução.</p></div>';
+        return;
+    }
+    
+    // Renderizar tabela de evolução
+    const dominios = ['Fonológico', 'Morfológico', 'Sintático', 'Semântico', 'Pragmático'];
+    
+    let html = '<table class="evolucao-tabela"><thead><tr><th>Domínio</th>';
+    avaliacoes.forEach(a => {
+        html += `<th>${new Date(a.data_avaliacao).toLocaleDateString('pt-PT')}</th>`;
+    });
+    html += '<th>Evolução</th></tr></thead><tbody>';
+    
+    for (let d = 0; d < 5; d++) {
+        html += `<tr><td><strong>${dominios[d]}</strong></td>`;
+        
+        let valores = [];
+        avaliacoes.forEach(a => {
+            if (a.competencias && a.competencias.length >= 40) {
+                const segs = a.competencias.slice(d * 8, (d + 1) * 8);
+                const vals = segs.filter(v => v !== null && !isNaN(v));
+                const media = vals.length > 0 ? vals.reduce((x, y) => x + y, 0) / vals.length : null;
+                valores.push(media);
+                html += `<td>${media !== null ? media.toFixed(1) : '-'}</td>`;
+            } else {
+                valores.push(null);
+                html += '<td>-</td>';
+            }
+        });
+        
+        // Calcular evolução
+        const primeiro = valores.find(v => v !== null);
+        const ultimo = valores.reverse().find(v => v !== null);
+        if (primeiro !== null && ultimo !== null && valores.length >= 2) {
+            const diff = ultimo - primeiro;
+            const classe = diff > 0.5 ? 'progresso-up' : diff < -0.5 ? 'progresso-down' : 'progresso-same';
+            const sinal = diff > 0 ? '+' : '';
+            html += `<td class="${classe}">${sinal}${diff.toFixed(1)}</td>`;
+        } else {
+            html += '<td>-</td>';
+        }
+        
+        html += '</tr>';
+    }
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+// --- IMPORTAÇÃO ---
+function iniciarImportacao(tipo) {
+    const input = document.getElementById('input-import-file');
+    if (input) {
+        input.dataset.tipo = tipo;
+        input.accept = tipo === 'excel' ? '.xlsx,.xls' : '.json';
+        input.click();
+    }
+}
+
+async function processarImportacao(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const tipo = e.target.dataset.tipo;
+    
+    try {
+        if (tipo === 'json') {
+            await importarJSON(file);
+        } else {
+            await importarExcel(file);
+        }
+        e.target.value = '';
+    } catch (error) {
+        console.error('Erro na importação:', error);
+        mostrarToast('Erro ao importar: ' + error.message, 'error');
+        e.target.value = '';
+    }
+}
+
+async function importarJSON(file) {
+    const text = await file.text();
+    const dados = JSON.parse(text);
+    
+    // Verificar formato
+    if (Array.isArray(dados)) {
+        // Lista de avaliações
+        let importados = 0;
+        for (const caso of dados) {
+            try {
+                await API.guardarCaso(caso);
+                importados++;
+            } catch (err) {
+                console.error('Erro ao importar caso:', err);
+            }
+        }
+        mostrarToast(`${importados} avaliações importadas`, 'success');
+    } else if (dados.competencias) {
+        // Avaliação única
+        await API.guardarCaso(dados);
+        mostrarToast('Avaliação importada', 'success');
+    }
+    
+    await carregarDadosGestao();
+}
+
+async function importarExcel(file) {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+    
+    let importados = 0;
+    for (const row of rows) {
+        try {
+            // Mapear colunas do Excel para estrutura de caso
+            const caso = {
+                codigo: row['Código'] || row['codigo'] || row['ID'],
+                nome: row['Nome'] || row['nome'],
+                idade: row['Idade'] || row['idade'],
+                data_avaliacao: row['Data'] || row['data'] || row['Data Avaliação'],
+                competencias: []
+            };
+            
+            // Tentar extrair competências (colunas Seg0 a Seg39 ou C0 a C39)
+            for (let i = 0; i < 40; i++) {
+                const val = row[`Seg${i}`] || row[`C${i}`] || row[`Competência ${i}`] || null;
+                caso.competencias.push(val !== null && val !== '' ? parseFloat(val) : null);
+            }
+            
+            await API.guardarCaso(caso);
+            importados++;
+        } catch (err) {
+            console.error('Erro ao importar linha:', err);
+        }
+    }
+    
+    mostrarToast(`${importados} avaliações importadas do Excel`, 'success');
+    await carregarDadosGestao();
+}
+
+// --- EXPORTAÇÃO ---
+async function exportarDados(formato) {
+    const dataDe = document.getElementById('export-data-de')?.value;
+    const dataAte = document.getElementById('export-data-ate')?.value;
+    
+    let dados = dadosGestao.avaliacoes;
+    
+    // Filtrar por data
+    if (dataDe || dataAte) {
+        dados = dados.filter(a => {
+            if (!a.data_avaliacao) return true;
+            const d = new Date(a.data_avaliacao);
+            if (dataDe && d < new Date(dataDe)) return false;
+            if (dataAte && d > new Date(dataAte)) return false;
+            return true;
+        });
+    }
+    
+    if (dados.length === 0) {
+        mostrarToast('Nenhuma avaliação para exportar', 'warning');
+        return;
+    }
+    
+    switch (formato) {
+        case 'excel':
+            exportarParaExcel(dados);
+            break;
+        case 'csv':
+            exportarParaCSV(dados);
+            break;
+        case 'json':
+            exportarParaJSON(dados);
+            break;
+    }
+}
+
+function exportarParaExcel(dados) {
+    // Preparar dados para Excel
+    const rows = dados.map(a => {
+        const row = {
+            'Código': a.codigo || '',
+            'Nome': a.nome || '',
+            'Idade': a.idade || '',
+            'Data Avaliação': a.data_avaliacao || '',
+            'Avaliador': a.avaliador || ''
+        };
+        
+        // Adicionar competências
+        const dominios = ['Fono', 'Morf', 'Sint', 'Sem', 'Prag'];
+        const niveis = ['Imp', 'Exp'];
+        const circuitos = ['Comp', 'Expr'];
+        const modalidades = ['Oral', 'Esc'];
+        
+        for (let i = 0; i < 40; i++) {
+            const d = Math.floor(i / 8);
+            const resto = i % 8;
+            const n = Math.floor(resto / 4);
+            const c = Math.floor((resto % 4) / 2);
+            const m = resto % 2;
+            
+            const colName = `${dominios[d]}_${niveis[n]}_${circuitos[c]}_${modalidades[m]}`;
+            row[colName] = a.competencias?.[i] ?? '';
+        }
+        
+        return row;
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Avaliações');
+    
+    XLSX.writeFile(wb, `PERLIM_Export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    mostrarToast('Excel exportado!', 'success');
+}
+
+function exportarParaCSV(dados) {
+    // Cabeçalho
+    let csv = 'Código,Nome,Idade,Data,';
+    for (let i = 0; i < 40; i++) csv += `Seg${i},`;
+    csv = csv.slice(0, -1) + '\n';
+    
+    // Dados
+    dados.forEach(a => {
+        csv += `"${a.codigo || ''}","${a.nome || ''}","${a.idade || ''}","${a.data_avaliacao || ''}",`;
+        for (let i = 0; i < 40; i++) {
+            csv += `${a.competencias?.[i] ?? ''},`;
+        }
+        csv = csv.slice(0, -1) + '\n';
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `PERLIM_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('CSV exportado!', 'success');
+}
+
+function exportarParaJSON(dados) {
+    const json = JSON.stringify(dados, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `PERLIM_Export_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('JSON exportado!', 'success');
+}
+
+// Função auxiliar
+function calcularIdadeAnos(dataNascimento) {
+    if (!dataNascimento) return null;
+    const hoje = new Date();
+    const nasc = new Date(dataNascimento);
+    let idade = hoje.getFullYear() - nasc.getFullYear();
+    const m = hoje.getMonth() - nasc.getMonth();
+    if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+    return idade;
+}
+
+// Expor funções
+window.abrirPainelGestao = abrirPainelGestao;
+window.seleccionarCriancaGestao = seleccionarCriancaGestao;
+window.novaAvaliacaoCrianca = novaAvaliacaoCrianca;
+window.carregarAvaliacaoGestao = carregarAvaliacaoGestao;
+window.eliminarAvaliacaoGestao = eliminarAvaliacaoGestao;
+window.exportarAvaliacaoWord = async (id) => {
+    const avaliacao = dadosGestao.avaliacoes.find(a => a.id === id);
+    if (avaliacao) {
+        casoActual = avaliacao;
+        await gerarRelatorioWord();
+    }
+};
+
+// Manter compatibilidade
+async function carregarCasoCloud(id) {
+    await carregarAvaliacaoGestao(id);
 }
 
 function preencherFormulario(caso) {
@@ -3261,6 +3936,8 @@ window.abrirEdicaoProva = abrirEdicaoProva;
 window.removerProvaAplicada = removerProvaAplicada;
 window.abrirEdicaoProvaCustom = abrirEdicaoProvaCustom;
 window.carregarCasoCloud = carregarCasoCloud;
+window.carregarCasoGuardado = carregarCasoGuardado;
+window.eliminarCasoGuardado = eliminarCasoGuardado;
 
 // ============================================================================
 // GESTÃO DE CRIANÇAS
