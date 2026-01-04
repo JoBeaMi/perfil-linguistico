@@ -4,6 +4,50 @@
    ========================================================================== */
 
 // ============================================================================
+// LAZY LOADING DE BIBLIOTECAS PESADAS
+// ============================================================================
+
+const bibliotecasCarregadas = { docx: false, xlsx: false };
+
+async function carregarBibliotecaDocx() {
+    if (bibliotecasCarregadas.docx) return true;
+    if (typeof docx !== 'undefined') {
+        bibliotecasCarregadas.docx = true;
+        return true;
+    }
+    
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/docx@8.5.0/build/index.umd.min.js';
+        script.onload = () => {
+            bibliotecasCarregadas.docx = true;
+            resolve(true);
+        };
+        script.onerror = () => reject(new Error('Falha ao carregar biblioteca docx'));
+        document.head.appendChild(script);
+    });
+}
+
+async function carregarBibliotecaXLSX() {
+    if (bibliotecasCarregadas.xlsx) return true;
+    if (typeof XLSX !== 'undefined') {
+        bibliotecasCarregadas.xlsx = true;
+        return true;
+    }
+    
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.mini.min.js';
+        script.onload = () => {
+            bibliotecasCarregadas.xlsx = true;
+            resolve(true);
+        };
+        script.onerror = () => reject(new Error('Falha ao carregar biblioteca xlsx'));
+        document.head.appendChild(script);
+    });
+}
+
+// ============================================================================
 // HEADER CAIDI PARA RELATÓRIOS (Base64)
 // ============================================================================
 
@@ -2046,15 +2090,18 @@ function gerarRelatorio() {
 // ============================================================================
 
 async function gerarRelatorioWord() {
-    // Verificar se biblioteca está carregada
-    if (typeof docx === 'undefined') {
-        mostrarToast('Biblioteca de exportação não carregada. Recarregue a página.', 'error');
-        return;
-    }
-    
     // Verificar se há dados
     if (!casoActual || !casoActual.competencias || casoActual.competencias.length === 0) {
         mostrarToast('Preencha o perfil antes de exportar', 'warning');
+        return;
+    }
+    
+    // Carregar biblioteca se necessário
+    try {
+        mostrarToast('A preparar exportação...', 'info');
+        await carregarBibliotecaDocx();
+    } catch (error) {
+        mostrarToast('Erro ao carregar biblioteca de exportação', 'error');
         return;
     }
     
@@ -3437,6 +3484,15 @@ async function importarJSON(file) {
 }
 
 async function importarExcel(file) {
+    // Carregar biblioteca se necessário
+    try {
+        mostrarToast('A carregar biblioteca Excel...', 'info');
+        await carregarBibliotecaXLSX();
+    } catch (error) {
+        mostrarToast('Erro ao carregar biblioteca Excel', 'error');
+        return;
+    }
+    
     const data = await file.arrayBuffer();
     const workbook = XLSX.read(data);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -3508,42 +3564,47 @@ async function exportarDados(formato) {
 }
 
 function exportarParaExcel(dados) {
-    // Preparar dados para Excel
-    const rows = dados.map(a => {
-        const row = {
-            'Código': a.codigo || '',
-            'Nome': a.nome || '',
-            'Idade': a.idade || '',
-            'Data Avaliação': a.data_avaliacao || '',
-            'Avaliador': a.avaliador || ''
-        };
-        
-        // Adicionar competências
-        const dominios = ['Fono', 'Morf', 'Sint', 'Sem', 'Prag'];
-        const niveis = ['Imp', 'Exp'];
-        const circuitos = ['Comp', 'Expr'];
-        const modalidades = ['Oral', 'Esc'];
-        
-        for (let i = 0; i < 40; i++) {
-            const d = Math.floor(i / 8);
-            const resto = i % 8;
-            const n = Math.floor(resto / 4);
-            const c = Math.floor((resto % 4) / 2);
-            const m = resto % 2;
+    // Carregar biblioteca e exportar
+    carregarBibliotecaXLSX().then(() => {
+        // Preparar dados para Excel
+        const rows = dados.map(a => {
+            const row = {
+                'Código': a.codigo || '',
+                'Nome': a.nome || '',
+                'Idade': a.idade || '',
+                'Data Avaliação': a.data_avaliacao || '',
+                'Avaliador': a.avaliador || ''
+            };
             
-            const colName = `${dominios[d]}_${niveis[n]}_${circuitos[c]}_${modalidades[m]}`;
-            row[colName] = a.competencias?.[i] ?? '';
-        }
+            // Adicionar competências
+            const dominios = ['Fono', 'Morf', 'Sint', 'Sem', 'Prag'];
+            const niveis = ['Imp', 'Exp'];
+            const circuitos = ['Comp', 'Expr'];
+            const modalidades = ['Oral', 'Esc'];
+            
+            for (let i = 0; i < 40; i++) {
+                const d = Math.floor(i / 8);
+                const resto = i % 8;
+                const n = Math.floor(resto / 4);
+                const c = Math.floor((resto % 4) / 2);
+                const m = resto % 2;
+                
+                const colName = `${dominios[d]}_${niveis[n]}_${circuitos[c]}_${modalidades[m]}`;
+                row[colName] = a.competencias?.[i] ?? '';
+            }
+            
+            return row;
+        });
         
-        return row;
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Avaliações');
+        
+        XLSX.writeFile(wb, `PERLIM_Export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        mostrarToast('Excel exportado!', 'success');
+    }).catch(() => {
+        mostrarToast('Erro ao carregar biblioteca Excel', 'error');
     });
-    
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Avaliações');
-    
-    XLSX.writeFile(wb, `PERLIM_Export_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    mostrarToast('Excel exportado!', 'success');
 }
 
 function exportarParaCSV(dados) {
