@@ -2412,9 +2412,8 @@ async function gerarRelatorioWord() {
             }]
         });
         
-        // Gerar e descarregar
-        const buffer = await Packer.toBuffer(doc);
-        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+        // Gerar e descarregar (usar toBlob para browser)
+        const blob = await Packer.toBlob(doc);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
