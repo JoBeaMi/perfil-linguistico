@@ -539,9 +539,9 @@ function inicializarEventListeners() {
     });
     
     // History actions
-    document.getElementById('btn-import-json').addEventListener('click', importarCaso);
-    document.getElementById('btn-export-all').addEventListener('click', exportarTodosCasos);
-    document.getElementById('history-search').addEventListener('input', filtrarHistorico);
+    document.getElementById('btn-import-json')?.addEventListener('click', importarCaso);
+    document.getElementById('btn-export-all')?.addEventListener('click', exportarTodosCasos);
+    document.getElementById('history-search')?.addEventListener('input', filtrarHistorico);
     
     // Atalhos de teclado
     document.addEventListener('keydown', tratarAtalhos);
