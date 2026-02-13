@@ -2071,7 +2071,7 @@ function gerarRelatorio() {
         </div>
         <div class="footer-center">
             <p>PERLIM — Perfil Linguístico Multidimensional</p>
-            <p>Modelo: Alves (2019) · Operacionalização: J. Miguel</p>
+            <p>Modelo: Dina Caetano Alves (2019) · Operacionalização: Joana Miguel (2026)</p>
         </div>
         <div class="footer-right">
             <p>Gerado em ${new Date().toLocaleDateString('pt-PT')}</p>
