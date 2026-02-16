@@ -1,67 +1,57 @@
 /* ==========================================================================
-   PERLIM - Módulo Provas
-   Gestão de provas aplicadas e provas custom
+   PERLIM - Modulo Provas
+   Gestao de provas aplicadas e provas custom
    ========================================================================== */
 
-// ============================================================================
-// VARIÁVEIS DO MÓDULO
-// ============================================================================
-
-let PROVAS_CUSTOM = [];
-
-// ============================================================================
-// INICIALIZAÇÃO
-// ============================================================================
+var PROVAS_CUSTOM = [];
 
 function inicializarProvas() {
     try {
         actualizarSelectProvas();
-        
-        document.getElementById('prova-sel')?.addEventListener('change', (e) => {
-            const opt = e.target.selectedOptions[0];
-            if (opt?.dataset.escala) {
-                const escEl = document.getElementById('prova-esc');
-                if (escEl) escEl.value = opt.dataset.escala;
-            }
-            actualizarSelectTarefas();
-        });
+        var sel = document.getElementById('prova-sel');
+        if (sel) {
+            sel.addEventListener('change', function(e) {
+                var opt = e.target.selectedOptions[0];
+                if (opt && opt.dataset.escala) {
+                    var escEl = document.getElementById('prova-esc');
+                    if (escEl) escEl.value = opt.dataset.escala;
+                }
+                actualizarSelectTarefas();
+            });
+        }
     } catch (e) {
         console.error('Erro ao inicializar provas:', e);
     }
 }
 
 function getProvas() {
-    return [...(typeof PROVAS_SISTEMA !== 'undefined' ? PROVAS_SISTEMA : []), ...PROVAS_CUSTOM];
+    var sistema = (typeof PROVAS_SISTEMA !== 'undefined') ? PROVAS_SISTEMA : [];
+    return sistema.concat(PROVAS_CUSTOM);
 }
 
 function guardarProvasCustomLocal() {
-    try {
-        guardarProvasCustom(PROVAS_CUSTOM);
-    } catch (e) {
-        console.error('Erro ao guardar provas custom:', e);
-    }
+    try { guardarProvasCustom(PROVAS_CUSTOM); } catch (e) { console.error('Erro:', e); }
 }
 
 function actualizarSelectProvas() {
     try {
-        const select = document.getElementById('prova-sel');
+        var select = document.getElementById('prova-sel');
         if (!select) return;
-        
         select.innerHTML = '<option value="">Selecionar prova...</option>';
-        
-        const provas = getProvas();
-        const dominios = [...new Set(provas.map(p => p.dominio))];
-        
-        dominios.forEach(dom => {
-            const group = document.createElement('optgroup');
+        var provas = getProvas();
+        var dominios = [];
+        provas.forEach(function(p) {
+            if (dominios.indexOf(p.dominio) === -1) dominios.push(p.dominio);
+        });
+        dominios.forEach(function(dom) {
+            var group = document.createElement('optgroup');
             group.label = dom;
-            provas.filter(p => p.dominio === dom).forEach(p => {
-                const opt = document.createElement('option');
+            provas.filter(function(p) { return p.dominio === dom; }).forEach(function(p) {
+                var opt = document.createElement('option');
                 opt.value = p.id;
-                opt.textContent = p.nome;
+                opt.textContent = p.nome + (p.custom ? ' (custom)' : '');
                 opt.dataset.escala = p.escala;
                 opt.dataset.segs = (p.segs || []).join(',');
-                if (p.custom) opt.textContent += ' 🔧';
                 group.appendChild(opt);
             });
             select.appendChild(group);
@@ -73,16 +63,15 @@ function actualizarSelectProvas() {
 
 function actualizarSelectTarefas() {
     try {
-        const provaId = document.getElementById('prova-sel')?.value;
+        var sel = document.getElementById('prova-sel');
+        var provaId = sel ? sel.value : null;
         if (!provaId) return;
-        
-        const prova = getProvas().find(p => p.id === provaId);
-        const tarefaSelect = document.getElementById('prova-tarefa');
-        if (!tarefaSelect || !prova?.tarefas) return;
-        
+        var prova = getProvas().find(function(p) { return p.id === provaId; });
+        var tarefaSelect = document.getElementById('prova-tarefa');
+        if (!tarefaSelect || !prova || !prova.tarefas) return;
         tarefaSelect.innerHTML = '<option value="">Geral</option>';
-        prova.tarefas.forEach(t => {
-            const opt = document.createElement('option');
+        prova.tarefas.forEach(function(t) {
+            var opt = document.createElement('option');
             opt.value = t.id;
             opt.textContent = t.nome;
             tarefaSelect.appendChild(opt);
@@ -92,127 +81,79 @@ function actualizarSelectTarefas() {
     }
 }
 
-// ============================================================================
-// ADICIONAR PROVA
-// ============================================================================
-
 function adicionarProva() {
     try {
-        const select = document.getElementById('prova-sel');
-        const escala = document.getElementById('prova-esc')?.value;
-        const valor = parseFloat(document.getElementById('prova-val')?.value);
-        
-        if (!select?.value || isNaN(valor)) {
+        var select = document.getElementById('prova-sel');
+        var escalaEl = document.getElementById('prova-esc');
+        var valorEl = document.getElementById('prova-val');
+        var escala = escalaEl ? escalaEl.value : '';
+        var valor = valorEl ? parseFloat(valorEl.value) : NaN;
+        if (!select || !select.value || isNaN(valor)) {
             mostrarToast('Selecione uma prova e insira um valor', 'warning');
             return;
         }
-        
-        const option = select.selectedOptions[0];
-        const segs = option.dataset.segs.split(',').map(Number);
-        const comp = converterParaCompetencia(valor, escala);
-        
-        segs.forEach(segIdx => {
+        var option = select.selectedOptions[0];
+        var segs = option.dataset.segs.split(',').map(Number);
+        var comp = converterParaCompetencia(valor, escala);
+        segs.forEach(function(segIdx) {
             if (segIdx < 40) {
                 casoActual.competencias[segIdx] = comp;
-                
-                const input = document.getElementById(`v-${segIdx}`);
-                if (input) {
-                    input.value = comp;
-                    actualizarZonaInput(input, comp);
-                }
-                
-                const slider = document.querySelector(`.comp-slider[data-idx="${segIdx}"]`);
+                var input = document.getElementById('v-' + segIdx);
+                if (input) { input.value = comp; actualizarZonaInput(input, comp); }
+                var slider = document.querySelector('.comp-slider[data-idx="' + segIdx + '"]');
                 if (slider) slider.value = comp;
-                
-                radarChart?.setValor(segIdx, comp);
+                if (radarChart) radarChart.setValor(segIdx, comp);
             }
         });
-        
-        const lista = document.getElementById('prova-list');
-        const idx = casoActual.provasAplicadas.length;
-        const item = document.createElement('div');
+        var lista = document.getElementById('prova-list');
+        var idx = casoActual.provasAplicadas.length;
+        var item = document.createElement('div');
         item.className = 'prova-item';
         item.dataset.idx = idx;
-        item.innerHTML = `
-            <span><b>${option.text}</b>: ${valor} (${escala}) → <b>${comp}/10</b></span>
-            <div class="prova-item-actions">
-                <button class="prova-item-edit" title="Editar">✏️</button>
-                <button class="prova-item-remove" title="Remover">×</button>
-            </div>
-        `;
-        item.querySelector('.prova-item-edit').addEventListener('click', () => abrirEdicaoProva(parseInt(item.dataset.idx)));
-        item.querySelector('.prova-item-remove').addEventListener('click', () => removerProvaAplicada(parseInt(item.dataset.idx)));
-        lista?.appendChild(item);
-        
-        casoActual.provasAplicadas.push({
-            prova: select.value,
-            nome: option.text,
-            valor, escala,
-            competencia: comp,
-            segmentos: segs,
-            data: new Date().toISOString()
-        });
-        
-        const valInput = document.getElementById('prova-val');
-        if (valInput) valInput.value = '';
-        const convEl = document.getElementById('conversion-value');
-        if (convEl) {
-            convEl.textContent = '—';
-            convEl.className = 'conversion-value';
-        }
-        
-        mostrarToast(`${option.text}: ${comp}/10`, 'success');
+        item.innerHTML = '<span><b>' + option.text + '</b>: ' + valor + ' (' + escala + ') &rarr; <b>' + comp + '/10</b></span><div class="prova-item-actions"><button class="prova-item-edit" title="Editar">&#9998;</button><button class="prova-item-remove" title="Remover">&times;</button></div>';
+        item.querySelector('.prova-item-edit').addEventListener('click', function() { abrirEdicaoProva(parseInt(item.dataset.idx)); });
+        item.querySelector('.prova-item-remove').addEventListener('click', function() { removerProvaAplicada(parseInt(item.dataset.idx)); });
+        if (lista) lista.appendChild(item);
+        casoActual.provasAplicadas.push({ prova: select.value, nome: option.text, valor: valor, escala: escala, competencia: comp, segmentos: segs, data: new Date().toISOString() });
+        if (valorEl) valorEl.value = '';
+        var convEl = document.getElementById('conversion-value');
+        if (convEl) { convEl.textContent = '\u2014'; convEl.className = 'conversion-value'; }
+        mostrarToast(option.text + ': ' + comp + '/10', 'success');
     } catch (e) {
         console.error('Erro ao adicionar prova:', e);
         mostrarToast('Erro ao adicionar prova', 'error');
     }
 }
 
-// ============================================================================
-// REMOVER PROVA
-// ============================================================================
-
 function removerProvaAplicada(idx) {
     try {
         if (idx < 0 || idx >= casoActual.provasAplicadas.length) return;
-        
-        const prova = casoActual.provasAplicadas[idx];
+        var prova = casoActual.provasAplicadas[idx];
         casoActual.provasAplicadas.splice(idx, 1);
-        
-        prova.segmentos.forEach(segIdx => {
-            const valores = casoActual.provasAplicadas
-                .filter(p => p.segmentos.includes(segIdx))
-                .map(p => p.competencia);
+        prova.segmentos.forEach(function(segIdx) {
+            var valores = casoActual.provasAplicadas.filter(function(p) { return p.segmentos.includes(segIdx); }).map(function(p) { return p.competencia; });
             if (valores.length > 0) {
-                const media = valores.reduce((a, b) => a + b, 0) / valores.length;
+                var media = valores.reduce(function(a, b) { return a + b; }, 0) / valores.length;
                 casoActual.competencias[segIdx] = Math.round(media * 10) / 10;
             } else {
                 casoActual.competencias[segIdx] = 0;
             }
-            radarChart?.setValor(segIdx, casoActual.competencias[segIdx]);
+            if (radarChart) radarChart.setValor(segIdx, casoActual.competencias[segIdx]);
         });
-        
-        radarChart?.desenhar();
-        
-        const lista = document.getElementById('prova-list');
-        const items = lista?.querySelectorAll('.prova-item');
-        if (items?.[idx]) items[idx].remove();
-        
+        if (radarChart) radarChart.desenhar();
+        var lista = document.getElementById('prova-list');
+        var items = lista ? lista.querySelectorAll('.prova-item') : [];
+        if (items[idx]) items[idx].remove();
         mostrarToast('Prova removida', 'info');
     } catch (e) {
         console.error('Erro ao remover prova:', e);
     }
 }
 
-// ============================================================================
-// EDIÇÃO DE PROVAS APLICADAS
-// ============================================================================
-
 function abrirEdicaoProva(idx) {
     try {
-        const prova = casoActual.provasAplicadas[idx];
+        var prova = casoActual.provasAplicadas[idx];
         if (!prova) return;
-        
         document.getElementById('edit-prova-idx').value = idx;
         document.getElementById('edit-prova-nome').textContent = prova.nome;
         document.getElementById('edit-prova-valor').value = prova.valor;
@@ -220,116 +161,107 @@ function abrirEdicaoProva(idx) {
         calcularCompetenciaEdicao();
         abrirModal('modal-editar-prova');
     } catch (e) {
-        console.error('Erro ao abrir edição:', e);
+        console.error('Erro ao abrir edicao:', e);
     }
 }
 
 function calcularCompetenciaEdicao() {
     try {
-        const valor = parseFloat(document.getElementById('edit-prova-valor')?.value);
-        const escala = document.getElementById('edit-prova-escala')?.value;
-        const preview = document.getElementById('edit-prova-preview');
-        
+        var valorEl = document.getElementById('edit-prova-valor');
+        var escalaEl = document.getElementById('edit-prova-escala');
+        var preview = document.getElementById('edit-prova-preview');
+        var valor = valorEl ? parseFloat(valorEl.value) : NaN;
+        var escala = escalaEl ? escalaEl.value : '';
         if (!isNaN(valor) && escala && preview) {
-            const comp = converterParaCompetencia(valor, escala);
-            preview.textContent = `${comp}/10`;
-            preview.className = `zone-${obterZona(comp)}`;
+            var comp = converterParaCompetencia(valor, escala);
+            preview.textContent = comp + '/10';
+            preview.className = 'zone-' + obterZona(comp);
         }
     } catch (e) {
-        console.error('Erro ao calcular edição:', e);
+        console.error('Erro ao calcular edicao:', e);
     }
 }
 
 function salvarEdicaoProva() {
     try {
-        const idx = parseInt(document.getElementById('edit-prova-idx')?.value);
-        const valor = parseFloat(document.getElementById('edit-prova-valor')?.value);
-        const escala = document.getElementById('edit-prova-escala')?.value;
-        
+        var idxEl = document.getElementById('edit-prova-idx');
+        var valorEl = document.getElementById('edit-prova-valor');
+        var escalaEl = document.getElementById('edit-prova-escala');
+        var idx = idxEl ? parseInt(idxEl.value) : NaN;
+        var valor = valorEl ? parseFloat(valorEl.value) : NaN;
+        var escala = escalaEl ? escalaEl.value : '';
         if (isNaN(idx) || isNaN(valor)) return;
-        
-        const prova = casoActual.provasAplicadas[idx];
+        var prova = casoActual.provasAplicadas[idx];
         if (!prova) return;
-        
-        const comp = converterParaCompetencia(valor, escala);
+        var comp = converterParaCompetencia(valor, escala);
         prova.valor = valor;
         prova.escala = escala;
         prova.competencia = comp;
-        
-        prova.segmentos.forEach(segIdx => {
+        prova.segmentos.forEach(function(segIdx) {
             casoActual.competencias[segIdx] = comp;
-            radarChart?.setValor(segIdx, comp);
+            if (radarChart) radarChart.setValor(segIdx, comp);
         });
-        
-        radarChart?.desenhar();
+        if (radarChart) radarChart.desenhar();
         fecharModal('modal-editar-prova');
         mostrarToast('Prova actualizada', 'success');
     } catch (e) {
-        console.error('Erro ao salvar edição:', e);
+        console.error('Erro ao salvar edicao:', e);
     }
 }
 
-// ============================================================================
-// PROVAS CUSTOM
-// ============================================================================
-
 function abrirEdicaoProvaCustom(provaId) {
     try {
-        const prova = getProvas().find(p => p.id === provaId);
+        var prova = getProvas().find(function(p) { return p.id === provaId; });
         if (!prova || !prova.custom) return;
-        
         document.getElementById('edit-custom-id').value = prova.id;
         document.getElementById('edit-custom-nome').value = prova.nome;
         document.getElementById('edit-custom-escala').value = prova.escala;
         document.getElementById('edit-custom-dominio').value = prova.dominio;
-        
-        const grid = document.getElementById('edit-custom-segmentos');
+        var grid = document.getElementById('edit-custom-segmentos');
         if (grid) {
             grid.innerHTML = '';
-            for (let i = 0; i < 40; i++) {
-                const selected = (prova.segs || prova.segmentos || []).includes(i);
-                const seg = SEGMENTOS[i];
-                const div = document.createElement('div');
-                div.className = `seg-checkbox ${selected ? 'selected' : ''}`;
+            for (var i = 0; i < 40; i++) {
+                var selected = (prova.segs || prova.segmentos || []).indexOf(i) !== -1;
+                var seg = SEGMENTOS[i];
+                var div = document.createElement('div');
+                div.className = 'seg-checkbox ' + (selected ? 'selected' : '');
                 div.dataset.seg = i;
-                div.textContent = `${seg.moduloNome?.substring(0, 3) || i}`;
-                div.title = `${MODULOS[seg.modulo]?.nome} > ${NIVEIS[seg.nivel]?.nome} > ${CIRCUITOS[seg.circuito]?.nome} > ${MODALIDADES[seg.modalidade]?.nome}`;
-                div.addEventListener('click', () => div.classList.toggle('selected'));
+                div.textContent = String(i);
+                div.title = MODULOS[seg.modulo].nome + ' > ' + NIVEIS[seg.nivel].nome + ' > ' + CIRCUITOS[seg.circuito].nome + ' > ' + MODALIDADES[seg.modalidade].nome;
+                div.addEventListener('click', function() { this.classList.toggle('selected'); });
                 grid.appendChild(div);
             }
         }
-        
         abrirModal('modal-editar-prova-custom');
     } catch (e) {
-        console.error('Erro ao abrir edição de prova custom:', e);
+        console.error('Erro ao abrir edicao de prova custom:', e);
     }
 }
 
 function salvarProvaCustomEditada() {
     try {
-        const id = document.getElementById('edit-custom-id')?.value;
-        const nome = document.getElementById('edit-custom-nome')?.value;
-        const escala = document.getElementById('edit-custom-escala')?.value;
-        const dominio = document.getElementById('edit-custom-dominio')?.value;
-        
-        const segs = [];
-        document.querySelectorAll('#edit-custom-segmentos .seg-checkbox.selected').forEach(el => {
+        var id = document.getElementById('edit-custom-id').value;
+        var nome = document.getElementById('edit-custom-nome').value;
+        var escala = document.getElementById('edit-custom-escala').value;
+        var dominio = document.getElementById('edit-custom-dominio').value;
+        var segs = [];
+        document.querySelectorAll('#edit-custom-segmentos .seg-checkbox.selected').forEach(function(el) {
             segs.push(parseInt(el.dataset.seg));
         });
-        
-        const idx = PROVAS_CUSTOM.findIndex(p => p.id === id);
+        var idx = PROVAS_CUSTOM.findIndex(function(p) { return p.id === id; });
         if (idx !== -1) {
-            PROVAS_CUSTOM[idx] = { ...PROVAS_CUSTOM[idx], nome, escala, dominio, segs };
+            PROVAS_CUSTOM[idx].nome = nome;
+            PROVAS_CUSTOM[idx].escala = escala;
+            PROVAS_CUSTOM[idx].dominio = dominio;
+            PROVAS_CUSTOM[idx].segs = segs;
         }
-        
         guardarProvasCustomLocal();
         inicializarProvas();
         fecharModal('modal-editar-prova-custom');
         mostrarToast('Prova actualizada', 'success');
-        
-        if (API.isAuthenticated()) {
-            API.actualizarProvaCustom?.(id, PROVAS_CUSTOM[idx]).catch(err => {
-                console.warn('Erro ao sincronizar prova custom:', err);
+        if (API.isAuthenticated() && API.actualizarProvaCustom) {
+            API.actualizarProvaCustom(id, PROVAS_CUSTOM[idx]).catch(function(err) {
+                console.warn('Erro ao sincronizar:', err);
             });
         }
     } catch (e) {
@@ -337,22 +269,16 @@ function salvarProvaCustomEditada() {
     }
 }
 
-async function eliminarProvaCustomEditada() {
+function eliminarProvaCustomEditada() {
     try {
-        const id = document.getElementById('edit-custom-id')?.value;
+        var id = document.getElementById('edit-custom-id').value;
         if (!confirm('Tem a certeza que deseja eliminar esta prova?')) return;
-        
-        const idx = PROVAS_CUSTOM.findIndex(p => p.id === id);
+        var idx = PROVAS_CUSTOM.findIndex(function(p) { return p.id === id; });
         if (idx !== -1) PROVAS_CUSTOM.splice(idx, 1);
-        
         guardarProvasCustomLocal();
-        
         if (API.isAuthenticated()) {
-            try { await API.eliminarProvaCustom(id); } catch (err) {
-                console.warn('Erro ao eliminar da cloud:', err);
-            }
+            try { API.eliminarProvaCustom(id); } catch (err) { console.warn('Erro:', err); }
         }
-        
         inicializarProvas();
         fecharModal('modal-editar-prova-custom');
         mostrarToast('Prova eliminada', 'info');
@@ -361,23 +287,22 @@ async function eliminarProvaCustomEditada() {
     }
 }
 
-async function carregarProvasCustomCloud() {
+function carregarProvasCustomCloud() {
     if (!API.isAuthenticated()) return;
-    
     try {
-        const provas = await API.listarProvasCustom();
-        provas.forEach(p => {
-            if (!getProvas().find(x => x.id === p.id)) {
-                PROVAS_CUSTOM.push(p);
-            }
+        API.listarProvasCustom().then(function(provas) {
+            provas.forEach(function(p) {
+                if (!getProvas().find(function(x) { return x.id === p.id; })) {
+                    PROVAS_CUSTOM.push(p);
+                }
+            });
+            inicializarProvas();
         });
-        inicializarProvas();
     } catch (err) {
         console.warn('Erro ao carregar provas cloud:', err);
     }
 }
 
-// Expor globalmente
 window.abrirEdicaoProva = abrirEdicaoProva;
 window.removerProvaAplicada = removerProvaAplicada;
 window.abrirEdicaoProvaCustom = abrirEdicaoProvaCustom;
