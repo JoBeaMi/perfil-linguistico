@@ -1,0 +1,262 @@
+/* ==========================================================================
+   PERLIM - UI Melhorias v1.0
+   Modais slide-up, confirmacao bonita, loading nos botoes
+   Adicionar ao index.html: <link rel="stylesheet" href="css/ui-melhorias.css">
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. MODAIS - Animacao slide-up suave + backdrop blur melhorado
+   -------------------------------------------------------------------------- */
+
+/* Substituir a animacao fadeSlideIn por slide-up mais suave */
+.modal.active {
+    animation: modalFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.modal.active .modal-content {
+    animation: modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalFadeIn {
+    from {
+        background: rgba(0, 0, 0, 0);
+        backdrop-filter: blur(0px);
+    }
+    to {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(12px);
+    }
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Hover sutil no modal-content */
+.modal-content {
+    transition: box-shadow 0.3s ease;
+}
+
+.modal-content:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 167, 157, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   2. DIALOG DE CONFIRMACAO (substitui confirm() nativo)
+   -------------------------------------------------------------------------- */
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: modalFadeIn 0.25s ease forwards;
+}
+
+.confirm-dialog {
+    background: var(--bg-secondary, #fff);
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+    animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.confirm-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 0.75rem;
+}
+
+.confirm-dialog-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.confirm-dialog-icon.warning {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    color: #E65100;
+}
+
+.confirm-dialog-icon.danger {
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+    color: #C62828;
+}
+
+.confirm-dialog-icon.info {
+    background: linear-gradient(135deg, #E0F7FA, #B2EBF2);
+    color: #00838F;
+}
+
+[data-theme="dark"] .confirm-dialog-icon.warning {
+    background: linear-gradient(135deg, rgba(230, 81, 0, 0.2), rgba(255, 152, 0, 0.15));
+}
+
+[data-theme="dark"] .confirm-dialog-icon.danger {
+    background: linear-gradient(135deg, rgba(198, 40, 40, 0.2), rgba(244, 67, 54, 0.15));
+}
+
+[data-theme="dark"] .confirm-dialog-icon.info {
+    background: linear-gradient(135deg, rgba(0, 131, 143, 0.2), rgba(0, 188, 212, 0.15));
+}
+
+.confirm-dialog-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary, #333);
+}
+
+.confirm-dialog-body {
+    padding: 0.5rem 1.5rem 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary, #666);
+}
+
+.confirm-dialog-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0 1.5rem 1.5rem;
+}
+
+.confirm-btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.625rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.confirm-btn:hover {
+    transform: translateY(-1px);
+}
+
+.confirm-btn:active {
+    transform: translateY(0);
+}
+
+.confirm-btn-cancel {
+    background: var(--bg-tertiary, #f5f5f5);
+    color: var(--text-secondary, #666);
+    border: 1px solid var(--border, #e0e0e0);
+}
+
+.confirm-btn-cancel:hover {
+    background: var(--bg-hover, #eee);
+}
+
+.confirm-btn-confirm {
+    background: linear-gradient(135deg, #EF5350, #C62828);
+    color: white;
+    box-shadow: 0 4px 14px rgba(198, 40, 40, 0.3);
+}
+
+.confirm-btn-confirm:hover {
+    box-shadow: 0 6px 20px rgba(198, 40, 40, 0.4);
+}
+
+.confirm-btn-confirm.primary {
+    background: linear-gradient(135deg, var(--caidi-turquesa, #00A79D), #007A70);
+    box-shadow: 0 4px 14px rgba(0, 167, 157, 0.3);
+}
+
+.confirm-btn-confirm.primary:hover {
+    box-shadow: 0 6px 20px rgba(0, 167, 157, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   3. BOTOES COM LOADING
+   -------------------------------------------------------------------------- */
+
+.btn.is-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn.is-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-top: -10px;
+    margin-left: -10px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: btnSpin 0.6s linear infinite;
+}
+
+/* Para botoes secundarios (fundo claro) */
+.btn-secondary.is-loading::after {
+    border-color: rgba(0, 0, 0, 0.15);
+    border-top-color: var(--caidi-turquesa, #00A79D);
+}
+
+@keyframes btnSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Transicao suave ao entrar/sair do loading */
+.btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease;
+}
+
+/* --------------------------------------------------------------------------
+   4. TOAST MELHORADO - Icone + barra de progresso
+   -------------------------------------------------------------------------- */
+
+.toast {
+    position: relative;
+    overflow: hidden;
+}
+
+.toast-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    border-radius: 0 0 0 8px;
+    animation: toastProgress 3.5s linear forwards;
+}
+
+.toast.success .toast-progress { background: #4caf50; }
+.toast.error .toast-progress { background: #f44336; }
+.toast.warning .toast-progress { background: #ff9800; }
+.toast.info .toast-progress { background: #2196f3; }
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
