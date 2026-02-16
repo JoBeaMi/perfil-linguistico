@@ -281,4 +281,103 @@ function abrirEdicaoProvaCustom(provaId) {
         document.getElementById('edit-custom-id').value = prova.id;
         document.getElementById('edit-custom-nome').value = prova.nome;
         document.getElementById('edit-custom-escala').value = prova.escala;
-        document.getElementById('edit-custom-do
+        document.getElementById('edit-custom-dominio').value = prova.dominio;
+        
+        const grid = document.getElementById('edit-custom-segmentos');
+        if (grid) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 40; i++) {
+                const selected = (prova.segs || prova.segmentos || []).includes(i);
+                const seg = SEGMENTOS[i];
+                const div = document.createElement('div');
+                div.className = `seg-checkbox ${selected ? 'selected' : ''}`;
+                div.dataset.seg = i;
+                div.textContent = `${seg.moduloNome?.substring(0, 3) || i}`;
+                div.title = `${MODULOS[seg.modulo]?.nome} > ${NIVEIS[seg.nivel]?.nome} > ${CIRCUITOS[seg.circuito]?.nome} > ${MODALIDADES[seg.modalidade]?.nome}`;
+                div.addEventListener('click', () => div.classList.toggle('selected'));
+                grid.appendChild(div);
+            }
+        }
+        
+        abrirModal('modal-editar-prova-custom');
+    } catch (e) {
+        console.error('Erro ao abrir edição de prova custom:', e);
+    }
+}
+
+function salvarProvaCustomEditada() {
+    try {
+        const id = document.getElementById('edit-custom-id')?.value;
+        const nome = document.getElementById('edit-custom-nome')?.value;
+        const escala = document.getElementById('edit-custom-escala')?.value;
+        const dominio = document.getElementById('edit-custom-dominio')?.value;
+        
+        const segs = [];
+        document.querySelectorAll('#edit-custom-segmentos .seg-checkbox.selected').forEach(el => {
+            segs.push(parseInt(el.dataset.seg));
+        });
+        
+        const idx = PROVAS_CUSTOM.findIndex(p => p.id === id);
+        if (idx !== -1) {
+            PROVAS_CUSTOM[idx] = { ...PROVAS_CUSTOM[idx], nome, escala, dominio, segs };
+        }
+        
+        guardarProvasCustomLocal();
+        inicializarProvas();
+        fecharModal('modal-editar-prova-custom');
+        mostrarToast('Prova actualizada', 'success');
+        
+        if (API.isAuthenticated()) {
+            API.actualizarProvaCustom?.(id, PROVAS_CUSTOM[idx]).catch(err => {
+                console.warn('Erro ao sincronizar prova custom:', err);
+            });
+        }
+    } catch (e) {
+        console.error('Erro ao salvar prova custom:', e);
+    }
+}
+
+async function eliminarProvaCustomEditada() {
+    try {
+        const id = document.getElementById('edit-custom-id')?.value;
+        if (!confirm('Tem a certeza que deseja eliminar esta prova?')) return;
+        
+        const idx = PROVAS_CUSTOM.findIndex(p => p.id === id);
+        if (idx !== -1) PROVAS_CUSTOM.splice(idx, 1);
+        
+        guardarProvasCustomLocal();
+        
+        if (API.isAuthenticated()) {
+            try { await API.eliminarProvaCustom(id); } catch (err) {
+                console.warn('Erro ao eliminar da cloud:', err);
+            }
+        }
+        
+        inicializarProvas();
+        fecharModal('modal-editar-prova-custom');
+        mostrarToast('Prova eliminada', 'info');
+    } catch (e) {
+        console.error('Erro ao eliminar prova custom:', e);
+    }
+}
+
+async function carregarProvasCustomCloud() {
+    if (!API.isAuthenticated()) return;
+    
+    try {
+        const provas = await API.listarProvasCustom();
+        provas.forEach(p => {
+            if (!getProvas().find(x => x.id === p.id)) {
+                PROVAS_CUSTOM.push(p);
+            }
+        });
+        inicializarProvas();
+    } catch (err) {
+        console.warn('Erro ao carregar provas cloud:', err);
+    }
+}
+
+// Expor globalmente
+window.abrirEdicaoProva = abrirEdicaoProva;
+window.removerProvaAplicada = removerProvaAplicada;
+window.abrirEdicaoProvaCustom = abrirEdicaoProvaCustom;
