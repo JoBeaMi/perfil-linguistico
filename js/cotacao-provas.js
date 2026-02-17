@@ -497,7 +497,7 @@ function encontrarSubteste(prova, subtesteId) {
  * abre o modal de cotação em vez do fluxo normal
  */
 function verificarProvaDetalhada() {
-    const select = document.getElementById('prova-select');
+    const select = document.getElementById('prova-sel');
     if (!select) return;
 
     select.addEventListener('change', function() {
@@ -523,9 +523,8 @@ function mostrarBotaoCotacaoDetalhada(provaId) {
     }
     
     container.innerHTML = `
-        <button class="btn btn-accent btn-block" onclick="abrirCotacaoProva('${provaId}')" style="margin: 8px 0; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: white;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            📋 Abrir Cotação Detalhada
+        <button class="btn btn-accent btn-block" onclick="abrirCotacaoProva('${provaId}')" style="margin: 8px 0; background: linear-gradient(135deg, #7C3AED, #5B21B6); color: white; padding: 12px; font-size: 0.95rem; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+            📋 Abrir Cotação Detalhada (GOL-E)
         </button>
     `;
     
