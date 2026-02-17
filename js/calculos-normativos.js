@@ -674,6 +674,120 @@ function listarProvasComNormas() {
     return Object.keys(TABELAS_NORMATIVAS);
 }
 
+
+// ============================================================================
+// INTEGRAÇÃO AUTOMÁTICA COM PROVAS_SISTEMA (dropdown)
+// ============================================================================
+
+/**
+ * Converte uma prova detalhada para o formato PROVAS_SISTEMA
+ * Assim não é preciso manter dados em dois sítios
+ */
+function provaDetalhadaParaSistema(provaId) {
+    const prova = PROVAS_DETALHADAS[provaId];
+    if (!prova) return null;
+
+    const todosSegs = new Set();
+    const todasTarefas = [];
+
+    prova.estruturas.forEach(est => {
+        est.subtestes.forEach(sub => {
+            sub.segmentos.forEach(s => todosSegs.add(s));
+            todasTarefas.push({
+                id: sub.id,
+                nome: sub.nome,
+                itens: sub.numItens
+            });
+        });
+    });
+
+    return {
+        id: prova.id,
+        nome: prova.nome,
+        escala: prova.escalaConversao || 'z',
+        dominio: 'Multi',
+        segs: Array.from(todosSegs).sort((a, b) => a - b),
+        desc: prova.nomeCompleto + ' (' + prova.autores + '). Cotação detalhada disponível.',
+        tarefas: todasTarefas,
+        temCotacaoDetalhada: true,
+        idadeMin: prova.idadeMin,
+        idadeMax: prova.idadeMax
+    };
+}
+
+/**
+ * Gera todas as entradas de provas detalhadas no formato PROVAS_SISTEMA
+ */
+function gerarProvasDetalhadasParaSistema() {
+    return Object.keys(PROVAS_DETALHADAS).map(id => provaDetalhadaParaSistema(id)).filter(Boolean);
+}
+
+/**
+ * Integra provas detalhadas com PROVAS_SISTEMA existente
+ * - Provas detalhadas SUBSTITUEM provas do sistema com IDs que começam igual
+ * - Ex: 'gol-e' substitui 'gol-e-morf'
+ */
+function integrarProvasDetalhadas() {
+    if (typeof PROVAS_SISTEMA === 'undefined') {
+        console.warn('PROVAS_SISTEMA não encontrado — a integração será feita depois');
+        return;
+    }
+
+    const provasDetalhadas = gerarProvasDetalhadasParaSistema();
+    const idsDetalhados = provasDetalhadas.map(p => p.id);
+
+    // Remover do PROVAS_SISTEMA as que são substituídas
+    const provasFiltradas = PROVAS_SISTEMA.filter(p => {
+        return !idsDetalhados.some(detId => {
+            return p.id === detId || p.id.startsWith(detId + '-');
+        });
+    });
+
+    // Limpar e re-popular
+    PROVAS_SISTEMA.length = 0;
+
+    // Agrupar por domínio
+    const provasPorDominio = {};
+    provasFiltradas.forEach(p => {
+        if (!provasPorDominio[p.dominio]) provasPorDominio[p.dominio] = [];
+        provasPorDominio[p.dominio].push(p);
+    });
+
+    // Adicionar detalhadas — Multi vai para o início
+    provasDetalhadas.forEach(p => {
+        if (!provasPorDominio[p.dominio]) provasPorDominio[p.dominio] = [];
+        provasPorDominio[p.dominio].unshift(p);
+    });
+
+    // Reconstruir na ordem dos domínios
+    const ordemDominios = ['Multi', 'Fonológico', 'Morfológico', 'Sintático', 'Semântico', 'Pragmático'];
+    ordemDominios.forEach(dom => {
+        if (provasPorDominio[dom]) {
+            provasPorDominio[dom].forEach(p => PROVAS_SISTEMA.push(p));
+        }
+    });
+
+    // Domínios extra
+    Object.keys(provasPorDominio).forEach(dom => {
+        if (!ordemDominios.includes(dom)) {
+            provasPorDominio[dom].forEach(p => PROVAS_SISTEMA.push(p));
+        }
+    });
+
+    console.log(`   Provas detalhadas integradas: ${idsDetalhados.join(', ')}`);
+    console.log(`   Total PROVAS_SISTEMA: ${PROVAS_SISTEMA.length}`);
+}
+
+// ============================================================================
+// AUTO-INICIALIZAÇÃO
+// ============================================================================
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', integrarProvasDetalhadas);
+} else {
+    integrarProvasDetalhadas();
+}
+
 // Log de confirmação
-console.log('✅ Motor de Cálculos Normativos v1.0 carregado');
+console.log('✅ Motor de Cálculos Normativos v1.1 carregado');
 console.log(`   Provas com normas: ${listarProvasComNormas().join(', ')}`);
